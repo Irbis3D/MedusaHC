@@ -380,6 +380,8 @@ Thanks to the `pin_watch` script, the printer always knows its state, even if yo
 The `DROP` macro can be used independently from `SET` to drop the currently installed hotend.  
 However, for manual dropping it is better to use the dedicated `DROP_CLOSE` macro.
 
+---
+
 All pickup and drop macros include checks.
 
 If after dropping or picking up a hotend the script detects that the sensor state does not match the expected one (for example, the drop failed, pickup failed, or some other hotend fell off its base), the printer will pause and enter an error state.
