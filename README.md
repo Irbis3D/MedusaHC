@@ -612,6 +612,17 @@ https://discord.gg/ae44FHv786
 
 That is where new ideas are tested, problems are discussed, and future directions are shaped.
 
+## License
+
+This project is licensed under the GNU General Public License v3.0.
+See the LICENSE file for details.
+
+## Author
+
+MedusaHC is an open-source project developed by Sergei Irbenek (Irbis3D).
+
+Attribution is not required by the license, but is highly appreciated.
+
 
 
 
