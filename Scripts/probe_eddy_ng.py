@@ -44,6 +44,7 @@ try:
     from klippy.extras.homing import HomingMove
 
     IS_KALICO = True
+    HAS_PROBE_RESULT_TYPE = False
 except ImportError:
     import mcu
     import pins
@@ -57,6 +58,7 @@ except ImportError:
     from .homing import HomingMove
 
     IS_KALICO = False
+    HAS_PROBE_RESULT_TYPE = hasattr(manual_probe, "ProbeResult")
 
 from . import ldc1612_ng
 
@@ -193,7 +195,7 @@ class ProbeEddyParams:
     # as it will cause your toolhead to try to push through your build plate in
     # the case of a failed tap. A value like -0.250 is no worse than moving the
     # nozzle down one or two notches too far when doing manual Z adjustment.
-    tap_target_z: float = -0.600
+    tap_target_z: float = -3
     # the tap mode to use. 'wma' is a derivative of weighted moving average,
     # 'butter' is a butterworth filter
     tap_mode: str = "butter"
@@ -509,10 +511,6 @@ class ProbeEddy:
         # The last gcode offset applied after tap, either the tap
         # value, or 0.0 if HOME_Z=1
         self._last_tap_gcode_adjustment = 0.0
-        
-        # Tool-tap mode: run normal tap, but do NOT apply offsets to gcode_move.
-        # Instead, report computed tap offset to a macro.
-        self._tool_tap_mode = False
 
         # This class emulates "PrinterProbe". We use some existing helpers to implement
         # functionality like start_session
@@ -533,6 +531,8 @@ class ProbeEddy:
 
         # runtime configurable
         self._tap_adjust_z = self.params.tap_adjust_z
+        
+        self._tool_tap_mode = False
 
         # define our own commands
         self._dummy_gcode_cmd: GCodeCommand = self._gcode.create_gcode_command("", "", {})
@@ -1430,7 +1430,7 @@ class ProbeEddy:
     # PrinterProbe interface
     #
 
-    def get_offsets(self):
+    def get_offsets(self, *args, **kwargs):
         # the z offset is the trigger height, because the probe will trigger
         # at z=trigger_height (not at z=0)
         return (
@@ -1635,7 +1635,6 @@ class ProbeEddy:
             self._tool_tap_mode = False
             self._sensor.set_drive_current(drive_current)
 
-    
     #
     # Tap probe
     #
@@ -1798,9 +1797,6 @@ class ProbeEddy:
 
     def cmd_TAP_next(self, gcmd: Optional[GCodeCommand] = None):
         self._log_debug("\nEDDYng Tap begin")
-            
-        if self._tool_tap_mode:
-            home_z = False
 
         if gcmd is None:
             gcmd = self._dummy_gcode_cmd
@@ -1958,13 +1954,13 @@ class ProbeEddy:
         # it to account for flex in the system (otherwise the Z would be too low)
         computed_tap_z = adjusted_tap_z = tap_z + tap_adjust_z
         self._last_tap_z = float(tap_z)
-        
+
         if self._tool_tap_mode:
             self._gcode.run_script_from_command(f"SET_TOOL_Z_OFFSET VALUE={computed_tap_z:.6f}")
             th.manual_move([None, None, tap_start_z], lift_speed)
             th.wait_moves()
             return
-        
+
         homed_to_str = ""
         if home_z:
             th_pos = th.get_position()
@@ -2314,14 +2310,20 @@ class ProbeEddyScanningProbe:
             # the probe would 'trigger'", because this is all done in terms of klicky-type probes
             z = float(self._scan_z + z_deviation)
 
-            results.append([th_pos[0], th_pos[1], z])
+            if HAS_PROBE_RESULT_TYPE:
+                bed_x = th_pos[0] + self.eddy.params.x_offset
+                bed_y = th_pos[1] + self.eddy.params.y_offset
+                res = manual_probe.ProbeResult(bed_x, bed_y, z_deviation,
+                                               th_pos[0], th_pos[1], th_pos[2])
+                self._printer.send_event("probe:update_results", [res])
+            else:
+                res = [th_pos[0], th_pos[1], z]
+                self._printer.send_event("probe:update_results", res)
+
+            results.append(res)
 
         # reset notes so that this session can continue to be used
         self._notes = []
-
-        # Allow axis_twist_compensation to update results
-        for epos in results:
-            self._printer.send_event("probe:update_results", epos)
 
         return results
 
