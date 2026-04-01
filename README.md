@@ -284,6 +284,13 @@ This macro contains the main coordinates and distances used in the system, as we
 
 - `variable_max_tool: 4` — required by the macros to operate with the specified number of hotends.
 
+After this, there are parameters that are used internally by the macros.  
+They should **not** be changed.
+
+#### [gcode_macro TOOL_STATE_0], [gcode_macro TOOL_STATE_1] and so on
+
+Each hotend must have its own `TOOL_STATE` macro (`TOOL_STATE_0`, `TOOL_STATE_1`, and so on), where all parameters for that specific hotend are defined.
+
 - `variable_prime_amount` — the amount of filament (in mm) extruded during priming.  
   A small value (**7–8 mm**) is suitable when printing with a draft/wipe tower.  
   A larger value (**14–16 mm**) can be used for printing without a tower.
@@ -294,21 +301,31 @@ This macro contains the main coordinates and distances used in the system, as we
 
 - `variable_clean_move` — `1` to perform a clean move, `0` to skip it and just move to `y_safe`.
 
-- `variable_clean_move_x`  
-- `variable_clean_move_y`  
+- `variable_clean_move_x`
+
+- `variable_clean_move_y`
+
 - `variable_clean_move_speed` — during cleaning, the hotend moves to the center of the brush and then performs a movement away from it using the parameters defined here.  
   Distances: a **positive** value moves in the positive direction, a **negative** value moves in the negative direction.
 
-- `variable_clean_retract`  
+- `variable_clean_retract`
+
 - `variable_clean_retract_speed` — additional retract after cleaning.
+
+
+- `variable_first_prime_flag: 1` - Do not change.
+
+- `variable_first_prime_amount` — the amount of filament (in mm) extruded during the first use of the hotend in a print.  
+  This value is usually larger than the regular priming amount.
+
+- `variable_first_prime_speed` — speed of the first-use priming.
+
+## Notes
 
 Keep in mind that the lengths of these two retracts are linked to the slicer parameter **“Retraction when switching material”**.  
 If the priming retract and the cleaning retract are **1 mm** each, then **“Retraction when switching material”** must be set to **2 mm**.
 
 In some situations, with certain filaments and when printing without a draft tower, these parameters require additional calibration.
-
-After this, there are parameters that are used internally by the macros.  
-They should **not** be changed.
 
 ## Main macros file
 
