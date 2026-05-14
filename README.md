@@ -42,13 +42,19 @@ Discord server - https://discord.gg/ae44FHv786
 
 ## Documentation and audience
 
-At the moment, the project does not have a full detailed assembly manual and is intended for experienced users.
-
-Later I will make a full video where I explain how everything works and how to set it up. There is also a chance that, thanks to subscribers, after some time there will be a normal text manual with pictures.
-
 For a general understanding, I recommend watching the first video about this project on my YouTube channel. You will not find all the information there, but you can get a general idea of how it works.
 
 [![MedusaHC video](https://img.youtube.com/vi/hpV5Z1TnGdY/maxresdefault.jpg)](https://www.youtube.com/watch?v=hpV5Z1TnGdY)
+
+Recently a video about the hardware part of MedusaHC was released on the channel. In the next video I will explain the software side — configuration, macros, and how everything is set up.
+
+[![MedusaHC Part 2 — Hardware Explained](https://img.youtube.com/vi/F2OpeA6CTm0/maxresdefault.jpg)](https://www.youtube.com/watch?v=F2OpeA6CTm0)
+
+But the main thing is that, thanks to the huge effort of **TallothEndill**, a detailed text manual is already in progress and largely covers the project. It is not fully finished yet, but it is already very useful as a reference:
+
+[MedusaHC manual (work in progress)](https://drive.google.com/file/d/1KkSGdeQZzl4gnCMKlBloHfCNIlD4JwAP/view)
+
+
 
 
 ## Parts, BOM, and files
