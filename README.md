@@ -280,6 +280,13 @@ This macro contains the main coordinates and distances used in the system, as we
 - `variable_y_brush` — the **Y coordinate** of the approximate center of the nozzle cleaning brush.  
 - `variable_x_prime_shift` — the **X distance** from `variable_x_t` to the priming point.
 
+- `variable_e_open`  
+- `variable_e_close` — the distance and direction (in mm of filament) the extruder motor rotates to open and close the feeder latch.  
+  Sign sets direction: by default open is negative, close is positive. Flip the sign if your extruder is wired or mounted the other way around.
+
+- `variable_e_cur_high_mult` — multiplier applied to the extruder's base TMC `run_current` to get the boosted current used during feeder **OPEN**.  
+  The boost is needed so the motor has enough torque to break the mechanical lock without skipping steps. Typical range: **1.3 – 1.8**.
+
 #### [gcode_macro GLOBAL_STATE]
 
 - `variable_max_tool: 4` — required by the macros to operate with the specified number of hotends.
@@ -628,7 +635,7 @@ If this approach remains the same, a separate fork with updates will be required
 The base auto-calibration settings have not changed.  
 They are located in `calibrate-offsets.cfg`, in the `[tools_calibrate]` block.
 
-In the `CALIBRATE_MOVE_OVER_PROBE` macro, you must specify an approximate point above the center of the Sexball sphere.
+In the CALIBRATE_MOVE_OVER_PROBE macro, you must specify an approximate point above the center of the Sexball sphere. The point is configured via the variable_probe_x, variable_probe_y, variable_probe_z variables defined at the top of that macro in calibrate-offsets.cfg.
 
 The standard macros from klipper-toolchanger are not suitable.  
 A modified `calibrate-offsets.cfg` is also included in this project.
