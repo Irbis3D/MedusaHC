@@ -434,34 +434,29 @@ The following sections are modified:
 
 - Start G-code
 
-CLEAR_PAUSE
-PRIME_FLAGS_SET
-M104 T0 S150
-M190 S[bed_temperature_initial_layer_single]
-G28
-OPEN
-CLOSE
-TAP_BASE_TOOL
+```
 START_PRINT INITIAL_TOOL=[initial_tool] INITIAL_TEMP={first_layer_temperature[initial_tool]} EXTRUDER_TEMP={is_extruder_used[0] ? idle_temperature[0] : 0} EXTRUDER1_TEMP={is_extruder_used[1] ? idle_temperature[1] : 0} EXTRUDER2_TEMP={is_extruder_used[2] ? idle_temperature[2] : 0} EXTRUDER3_TEMP={is_extruder_used[3] ? idle_temperature[3] : 0} BED_TEMP=[bed_temperature_initial_layer_single]
-PRIME_FLAGS_CLEAR
-T{current_extruder}
-CLEAN
-LINE_PURGE
-G92 E0
+```
 
-  
 - End G-code
+
+```
 END_PRINT
+```
 
-- Change filament G-code  
+- Change filament G-code
+
+```
 T{next_extruder}
-
+```
 
 - The **Layer change G-code** also includes a modification that assigns a layer variable. It is not used at the moment, but may be useful in the future.
+
+```
 ;AFTER_LAYER_CHANGE
 LAYER_SET L={layer_num}
 ;[layer_z]
-
+```
 
 ### Multimaterial tab
 
