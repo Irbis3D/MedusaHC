@@ -1,4 +1,3 @@
-
 # MedusaHC (Beta)
 
 ![MedusaHC](Images/MedusaHC_image.png)
@@ -225,10 +224,15 @@ All (or at least almost all) macros are designed to be universal and work with a
 
 This block configures the `pin_watch` script.
 
-- `sync_toolchanger: 1` — enables tool initialization in klipper-toolchanger (used for auto-calibration; explanation later).  
-- `verbose` — enables additional console output with detailed pin state information.  
-- `pin_e` — microswitch pin located on the toolhead.  
+- `sync_toolchanger: 1` — enables tool initialization in klipper-toolchanger (used for auto-calibration; explanation later).
+- `sync_mainsail_tools: 1` — highlights the active tool button in the Mainsail/Fluidd tools panel. When a tool is successfully picked up, the corresponding `T<N>` button gets `variable_active = 1`, others get `0`.
+- `sync_mainsail_sensors: 1` — turns each tool's button into a state indicator lamp via `variable_color`. The active tool is shown in blue, parked tools (endstop pressed) in green, missing tools (endstop released) in red. The lamp is updated immediately from pin edges, so anomalies are visible in real time.
+- `color_active`, `color_pressed`, `color_released` — hex colors (without `#`) used by the indicator lamp. Defaults: blue / green / red.
+- `verbose` — enables additional console output with detailed pin state information.
+- `pin_e` — microswitch pin located on the toolhead.
 - `pin_t0`, `pin_t1`, etc. — microswitch pins on the bases of the corresponding hotends.
+
+Each sync feature is independent and defaults to off in fresh installs — enable only the ones you want.
 
 #### [duplicate_pin_override]
 
@@ -243,6 +247,9 @@ A corresponding `extruder` block must be created for each hotend.
 
 Mandatory macros that “create” additional tools in the system.  
 The number of these macros must match the number of hotends.
+
+Each `T<N>` macro must declare two variables: `variable_active: 0` and `variable_color: ""`.
+These are required by Mainsail/Fluidd to render the tools panel and to receive runtime updates from `pin_watch` when `sync_mainsail_tools` or `sync_mainsail_sensors` is enabled.
 
 #### [servo my_servo]
 
@@ -608,7 +615,7 @@ The configuration is minimal:
 In practice, klipper-toolchanger does almost nothing.  
 All MHC functionality still works exactly as before.
 
-The only thing klipper-toolchanger needs for auto-calibration is to know which tool is currently active and to pass calibration data back.
+The only thing klipper-toolchanger needs for auto-calibration is to know which tool is currently active and to expose calibration results back to MHC macros.
 
 To synchronize MHC state with it, you must set:
 
@@ -620,19 +627,7 @@ sync_toolchanger: 1
 
 in the `[pin_watch io]` script configuration.
 
-To receive calibration data, you must place the modified `tools_calibrate.py` script into:
-
-```
-
-/home/biqu/klipper-toolchanger/klipper/extras
-
-```
-
-Since we are modifying an internal script, automatic updates of klipper-toolchanger will show an error.
-
-Because of this, at this stage I do **not** recommend enabling auto-update for klipper-toolchanger in `moonraker.conf`.
-
-If this approach remains the same, a separate fork with updates will be required.
+Calibration results are read by MHC macros directly from `printer.tools_calibrate.last_x_result / last_y_result / last_z_result`, which the stock klipper-toolchanger already exposes. **No script modifications are required** — the original `tools_calibrate.py` is used as-is, and klipper-toolchanger can be updated normally (including automatic updates via `moonraker.conf`).
 
 ---
 
@@ -641,10 +636,9 @@ If this approach remains the same, a separate fork with updates will be required
 The base auto-calibration settings have not changed.  
 They are located in `calibrate-offsets.cfg`, in the `[tools_calibrate]` block.
 
-In the CALIBRATE_MOVE_OVER_PROBE macro, you must specify an approximate point above the center of the Sexball sphere. The point is configured via the variable_probe_x, variable_probe_y, variable_probe_z variables defined at the top of that macro in calibrate-offsets.cfg.
+In the `CALIBRATE_MOVE_OVER_PROBE` macro, you must specify an approximate point above the center of the Sexball sphere. The point is configured via the `variable_probe_x`, `variable_probe_y`, `variable_probe_z` variables defined at the top of that macro in `calibrate-offsets.cfg`.
 
-The standard macros from klipper-toolchanger are not suitable.  
-A modified `calibrate-offsets.cfg` is also included in this project.
+The MHC version of `calibrate-offsets.cfg` is included in this project. It wraps the stock `TOOL_CALIBRATE_TOOL_OFFSET` command from klipper-toolchanger and pulls the result into the MHC `TOOL_OFFSET` variables and `saved_vars` automatically — no patching of klipper-toolchanger internals.
 
 For fully automatic calibration with saving and applying all offsets, run the macro:
 
@@ -679,7 +673,3 @@ See the LICENSE file for details.
 MedusaHC is an open-source project developed by Sergei Irbenek (Irbis3D).
 
 Attribution is not required by the license, but is highly appreciated.
-
-
-
-
