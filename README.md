@@ -415,7 +415,7 @@ Thanks to the `pin_watch` script, the printer always knows its state, even if yo
 ### DROP macro and error handling
 
 The `DROP` macro can be used independently from `SET` to drop the currently installed hotend.  
-However, for manual dropping it is better to use the dedicated `DROP_CLOSE` macro.
+However, for manual dropping it is better to use the dedicated `DROP_TOOL` macro.
 
 ---
 
