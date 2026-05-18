@@ -31,6 +31,16 @@ class PinWatch:
 
         self.toolchanger_name = config.get("toolchanger", "toolchanger")
         self.sync_toolchanger = int(config.get("sync_toolchanger", 1)) != 0
+        # Mainsail/Fluidd UI sync (two independent toggles).
+        self.sync_mainsail_tools = int(config.get("sync_mainsail_tools", 0)) != 0
+        self.sync_mainsail_sensors = int(config.get("sync_mainsail_sensors", 0)) != 0
+        # Lamp colors (hex without '#').
+        self.color_pressed = str(config.get("color_pressed", "00C853")).strip()
+        self.color_released = str(config.get("color_released", "D32F2F")).strip()
+        self.color_active = str(config.get("color_active", "1976D2")).strip()
+        # Caches to avoid redundant SET_GCODE_VARIABLE writes.
+        self._last_ui_active = None         # int: last active tool index, -1 = none
+        self._last_ui_lamp = {}             # dict[int, str]: last color per tool
         self.verbose = int(config.get("verbose", 0)) != 0
 
         # Collapse bursts: schedule compute after assign_delay seconds from last edge.
@@ -110,6 +120,11 @@ class PinWatch:
                 self.state[label] = s
                 if self.verbose:
                     self._info("pin_watch %s: %s -> %d (t=%.6f)" % (self.name, label, s, eventtime))
+                # Immediate lamp update on t<i> edges (sensor-mirror mode).
+                if self.sync_mainsail_sensors:
+                    ti = self._parse_t_index(label)
+                    if ti is not None:
+                        self._update_lamp(ti, s)
                 self._schedule_compute(label, self.assign_delay)
             except Exception:
                 logging.exception("pin_watch %s: exception in pin callback (%s)", self.name, label)
@@ -191,7 +206,28 @@ class PinWatch:
                 )
             )
             if self.sync_toolchanger:
-                self._request_toolchanger_sync(self.current_tool)
+                try:
+                    self._request_toolchanger_sync(self.current_tool)
+                except Exception:
+                    logging.exception(
+                        "pin_watch %s: toolchanger sync failed", self.name
+                    )
+            if self.sync_mainsail_tools:
+                try:
+                    self._sync_mainsail_tools(self.current_tool)
+                except Exception:
+                    logging.exception(
+                        "pin_watch %s: mainsail tools sync failed", self.name
+                    )
+            if self.sync_mainsail_sensors:
+                # active tool's lamp may need to flip to blue,
+                # and previously-active tool may need to revert to its real state
+                try:
+                    self._refresh_lamps()
+                except Exception:
+                    logging.exception(
+                        "pin_watch %s: mainsail lamps refresh failed", self.name
+                    )
         except Exception:
             logging.exception("pin_watch %s: exception in compute/apply", self.name)
             try:
@@ -281,6 +317,70 @@ class PinWatch:
             self._run_cmd("UNSELECT_TOOL")
             if self.verbose:
                 self._info("pin_watch %s: ASSIGN_TOOL -> UNSELECT_TOOL (ct=%d)" % (self.name, ct))
+
+    # --- mainsail/fluidd UI sync ---
+    def _sync_mainsail_tools(self, ct):
+        # Write variable_active on T0..Tn: 1 on active tool, 0 on others.
+        N = self._tool_count()
+        if N < 1:
+            return
+        active = int(ct) if ct >= 0 else -1
+        if self._last_ui_active == active:
+            return
+        for i in range(N):
+            v = 1 if i == active else 0
+            try:
+                self._run_cmd(
+                    "SET_GCODE_VARIABLE MACRO=T%d VARIABLE=active VALUE=%d" % (i, v)
+                )
+            except Exception:
+                logging.exception(
+                    "pin_watch %s: failed to set T%d.active", self.name, i
+                )
+        self._last_ui_active = active
+        if self.verbose:
+            self._info(
+                "pin_watch %s: UI sync -> active T=%d" % (self.name, active)
+            )
+
+    def _update_lamp(self, ti, state):
+        # Write variable_color for one tool.
+        # Active tool: blue (overrides endstop).
+        # Others: green if pressed (parked), red if released (missing).
+        N = self._tool_count()
+        if ti >= N:
+            return
+        if ti == int(self.current_tool):
+            color = self.color_active
+        else:
+            color = self.color_pressed if int(state) == 1 else self.color_released
+        if self._last_ui_lamp.get(ti) == color:
+            return
+        try:
+            # VALUE needs an inner-quoted string literal so Klipper parses
+            # it as a Python string, not an identifier/number.
+            self._run_cmd(
+                "SET_GCODE_VARIABLE MACRO=T%d VARIABLE=color VALUE='\"%s\"'"
+                % (ti, color)
+            )
+            self._last_ui_lamp[ti] = color
+            if self.verbose:
+                self._info(
+                    "pin_watch %s: lamp T%d -> %s (t_i=%d, active=%d)"
+                    % (self.name, ti, color, int(state), int(self.current_tool))
+                )
+        except Exception:
+            logging.exception(
+                "pin_watch %s: failed to set T%d.color", self.name, ti
+            )
+
+    def _refresh_lamps(self):
+        # Re-evaluate every tool's lamp using the cached t<i> pin states.
+        # Used after current_tool changes.
+        N = self._tool_count()
+        for i in range(N):
+            s = int(self.state.get("t%d" % i, 0))
+            self._update_lamp(i, s)
 
     def _info(self, msg):
         if not self.verbose:
