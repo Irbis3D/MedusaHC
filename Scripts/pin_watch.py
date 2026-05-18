@@ -6,6 +6,12 @@
 # - Optional toolchanger sync:
 #     * While printing: only INITIALIZE_TOOLCHANGER when ct >= 0 (never UNSELECT)
 #     * While not printing: ct >= 0 -> INITIALIZE_TOOLCHANGER, else -> UNSELECT_TOOL
+# - Optional Mainsail/Fluidd UI sync (two independent toggles):
+#     * sync_mainsail_tools   -> variable_active on T0..Tn (active button highlight)
+#     * sync_mainsail_sensors -> variable_color on T0..Tn (indicator lamp):
+#         active tool       -> blue (overrides endstop)
+#         t_i = 1 (pressed) -> green (parked in dock)
+#         t_i = 0 (released)-> red (missing)
 # - All gcode executed only via gcode.run_script_from_command(...)
 # - All exceptions inside callbacks/timers are caught (won't shutdown Klipper)
 
