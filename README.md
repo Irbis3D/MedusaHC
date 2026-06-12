@@ -6,8 +6,10 @@
 MedusaHC is an open-source toolchanger (hotend-changer) project.  
 This is a beta version of the project. It is not finished yet, and there may be bugs during operation. The project will be updated gradually.
 
-The project is fully open. You can do whatever you want with it.  
-Only one request: it is not required, but I would be very grateful if you mention me in your modifications and derivatives of this project.
+This project is licensed under GNU GPLv3.
+You're free to use, modify, and share it — just keep the copyright/license notices intact, provide the source code, release derivatives under GPLv3 too, and note what you changed.
+
+For the exact terms, see the LICENSE file.
 
 ## Support the project
 
