@@ -278,7 +278,7 @@ This block defines the file where tool offsets are stored so they can be restore
 This macro contains the main coordinates and distances used in the system, as well as the speeds and accelerations for the tool change procedure.
 
 - `variable_x_t0`, `variable_x_t1`, etc. — the **X coordinate** where each hotend is mounted on its base.  
-  In this configuration, the minimum safe distance between tools is **65 mm**. With small modifications, this distance could probably be reduced slightly, but not by much — maybe **5–10 mm**.
+  In this configuration, the minimum safe distance between tools is **60 mm**. With small modifications, this distance could probably be reduced slightly, but not by much — maybe **5–10 mm**.
 
 - `variable_y_safe` — the **Y coordinate** where the extruder with an inserted hotend can freely move left and right without hitting other hotends on their bases.  
   In my case, this coordinate is **negative**, because I used slightly extended profiles on the Y axis. This way, I do not lose any printable area. With standard profiles, there is a chance you will lose **5–10 mm** on the Y axis.
