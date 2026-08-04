@@ -109,7 +109,7 @@ An MGN12H installation requires the MedusaHC mounting system to be raised slight
 
 There are two mounting options for a front installation:
 
-1. Keep the standard Duender front XY mounts and print the MedusaHC adapters available in the [Duender repository](https://github.com/Irbis3D/Duender).
+1. Keep the standard Duender front XY mounts and glue the included `Base_Profile_Mount_L.stl` and `Base_Profile_Mount_R.stl` adapters to them. The adapters are located in `STLs/V-Front Mounts`.
 2. Replace the standard front mounts with the V-Front mounts contributed by GN500. These mounts include an opening for the front profile. The MGN9H versions are included in this package; an MGN12H version is available from GN500 on Printables.
 
 No other Duender kinematic changes are required for the V-Front installation. The X rail and belt path remain in their normal orientation.

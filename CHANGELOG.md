@@ -28,6 +28,7 @@ V0.2 is a major mechanical, configuration, calibration, and repository update. I
 
 - Added separate `V-Front Mounts` and `V-Back Mounts` folders.
 - Added new front and rear dock mounts and reversed MGN9H X-axis mounts.
+- Retained the left and right glue-on adapters for installing MedusaHC on the standard Duender front mounts.
 - Added separate V-Front and V-Back main bin parts.
 - Updated the common dock base, bin, mounting plate, feeder, toolhead, and carriage parts.
 - Added updated nozzle-cleaning, PTFE-cleaning, priming, PTFE-routing, and wire-management parts.
@@ -105,7 +106,7 @@ V0.2 is a major mechanical, configuration, calibration, and repository update. I
 
 - Removed the V0.1 OrcaSlicer projects from the current branch.
 - Removed the separate V0.1 STEP component files from the current branch.
-- Removed obsolete base, profile-mount, brush, nozzle-close, feeder, and toolhead models that were replaced by V0.2 parts.
+- Removed obsolete base, brush, nozzle-close, feeder, and toolhead models that were replaced by V0.2 parts.
 - Removed `eddy_ng.cfg`, `eddy_ng_features.cfg`, and `probe_eddy_ng.py`.
 - Removed the old optional `KlipperScreen.conf` example.
 

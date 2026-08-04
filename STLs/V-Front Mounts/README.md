@@ -6,7 +6,7 @@ V-Front provides room for more tools and can be convenient when adapting MedusaH
 
 There are two supported approaches for a Duender front installation:
 
-- keep the standard Duender front mounts and use the printable MedusaHC adapters from the [Duender repository](https://github.com/Irbis3D/Duender);
+- keep the standard Duender front mounts and glue the included `Base_Profile_Mount_L.stl` and `Base_Profile_Mount_R.stl` adapters to them;
 - replace the standard mounts with the GN500 V-Front mounts in this folder.
 
 GN500 has also published an MGN12H version on Printables. The files in this folder are the MGN9H version. For V-Front, the X rail and belt routing remain in the standard Duender orientation; no other kinematic changes are required.
