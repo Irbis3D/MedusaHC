@@ -1,9 +1,11 @@
-# MedusaHC (Beta)
+# MedusaHC V0.2 (Beta)
 
-![MedusaHC](Images/MedusaHC_image.png)
+![MedusaHC V-Front](Images/V-Front.png)
+
+![MedusaHC V-Back](Images/V-Back.png)
 
 
-MedusaHC is an open-source toolchanger (hotend-changer) project.  
+MedusaHC is an open-source toolchanger (hotend-changer) project.
 This is a beta version of the project. It is not finished yet, and there may be bugs during operation. The project will be updated gradually.
 
 This project is licensed under GNU GPLv3.
@@ -15,9 +17,9 @@ For the exact terms, see the LICENSE file.
 
 If you have the ability and desire to support the project, you can do it in several ways:
 
-- Patreon — monthly support: https://patreon.com/Irbis3D  
-- Ko-fi / Buy Me a Coffee — one-time donations: https://buymeacoffee.com/Irbis3D  
-- YouTube Super Thanks — under any video: https://youtube.com/@Irbis3D  
+- Patreon — monthly support: https://patreon.com/Irbis3D
+- Ko-fi / Buy Me a Coffee — one-time donations: https://buymeacoffee.com/Irbis3D
+- YouTube Super Thanks — under any video: https://youtube.com/@Irbis3D
 
 Your support helps me create more content, upgrade gear, and keep experimenting with cool ideas.
 
@@ -25,21 +27,42 @@ Also, by buying parts using my links, you help as well.
 
 ## Credits
 
-This project uses some work and ideas from the Dragonburner project by chirpy2605:  
+This project uses some work and ideas from the Dragonburner project by chirpy2605:
 https://github.com/chirpy2605/voron/tree/main/V0/Dragon_Burner
 
-As well as from Sherpa_mini-Extruder by Annex-Engineering  
+As well as from Sherpa_mini-Extruder by Annex-Engineering
 https://github.com/Annex-Engineering/Sherpa_Mini-Extruder
+
+The alternative V-Front mounts with a profile opening were contributed by **GN500**. GN500 has also published an MGN12H version on Printables.
 
 ## Current status and compatibility
 
-Right now, MedusaHC is an add-on for my Duender project:  
-https://www.printables.com/model/1300968-duender-mgn9h-2x-creality-ender-3-corexy-convertio
+Right now, MedusaHC is an add-on for my Duender project:
+https://www.printables.com/model/1798903-duender-project-ender-3-to-corexy-conversion
+https://github.com/Irbis3D/Duender
 
-Potentially, the project can be adapted for other classic CoreXY printers (as long as the printer has enough space in the front for the hotends and the bases). Theoretically, with small modifications, MedusaHC can also be adapted for CoreXY with a flying gantry.
+V0.2 supports two basic dock layouts:
 
-The point of the project is that, unlike classic toolchangers, MedusaHC swaps only the hotend as a tool (with heater, thermistor, and fan). I am not the first who did this and I will not be the last. This topic is actively discussed and developed on my  
+- **V-Front** — the hotend bases are installed in front of the print area. This layout can accommodate more tools and may be more convenient when adapting MedusaHC to other CoreXY printers, including Voron-style machines.
+- **V-Back** — the hotend bases are installed behind the print area, closer to the XY motors. The shorter effective belt path between the drive and the dock area reduces the influence of belt elasticity during tool changes and can improve docking repeatability. It also keeps the front of the printer unobstructed and the print area easy to see.
+
+The supplied STEP assembly is a visual and mechanical reference. It demonstrates that up to **5 tools** can fit in the V-Front layout and shows a **4-tool** V-Back arrangement. The supplied configuration and OrcaSlicer profile are intentionally set up for **4 tools**.
+
+The project can potentially be adapted for other classic CoreXY printers and, with suitable mounting changes, for CoreXY machines with a flying gantry. Available space, axis travel, dock coordinates, parking positions, wiring, and controller capacity must be checked for every printer.
+
+The point of the project is that, unlike classic toolchangers, MedusaHC swaps only the hotend as a tool (with heater, thermistor, and fan). I am not the first who did this and I will not be the last. This topic is actively discussed and developed on my
 Discord server - https://discord.gg/ae44FHv786
+
+## What is new in V0.2
+
+- V-Front and V-Back dock layouts use the same main tool-change macros.
+- `variable_tools_direction` automatically reverses layout-dependent pickup, drop, cleaning, and priming movements.
+- The supplied configuration uses four tools numbered normally from `T0` to `T3`.
+- The base, nozzle-cleaning, PTFE-cleaning, priming, and wire-management parts have been updated.
+- Native Klipper Eddy tap replaces Eddy-ng for Z probing and Z-only tool calibration.
+- Full X/Y/Z calibration is handled through klipper-toolchanger with SexBall, Nudge, or a similar contact sensor.
+- Updated OrcaSlicer projects, a 4-tool printer preset, and post-processing scripts are included.
+- Experimental camera-assisted XY calibration files are retained as a reference but are not yet adapted to the V0.2 configuration.
 
 ## Documentation and audience
 
@@ -66,11 +89,43 @@ https://docs.google.com/spreadsheets/d/1xkOzb10DBJzalW4n1tYroh-m_ZFsTQipC1BpUh5Z
 
 For this project you need to buy quite a lot of parts. I tried not to use expensive and rare components. You can find the list at the link above. This file will be updated as the project updates.
 
-You can also find and export the print models yourself from the STEP file (the file was created in Fusion360. There were issues when opening it in FreeCAD, possibly due to some format mismatch).
+The full STEP file contains both V-Front and V-Back reference assemblies. It is primarily intended to show the construction, available space, and the relationship between the parts. It is not a promise that the example tool count matches the supplied 4-tool configuration. The file was created in Fusion 360; FreeCAD may have problems opening it because of STEP compatibility differences.
 
-There are also all STL files. In addition, you can use the 3MF file. This is an exported OrcaSlicer project, where you can see the orientation of all parts, the marked areas where supports are needed, and the settings I used to print the parts. This file will be useful later during setup, because it contains a full slicer config for MedusaHC.
+Printable STL files are organized by subsystem. The layout-specific mounting parts are separated into `V-Front Mounts` and `V-Back Mounts` folders. Common base, feeder, hotend, and toolhead parts are stored in their own folders.
 
-To understand how everything should be assembled, for now use the STEP file. I printed all parts in ABS with 98% infill.
+The OrcaSlicer 3MF projects and the 4-tool printer preset are located in the `Slicer` folder. They show the printer configuration and a multicolor test project. Post-processing paths are computer-specific and must be configured by the user.
+
+To understand how the system is assembled, use the STEP file together with the STL folder descriptions. I printed the functional parts in ABS with 98% infill.
+
+### Duender XY mounting compatibility
+
+The layout-specific mounts supplied in this V0.2 package are designed for a **Duender with MGN9H rails on the XY axes**.
+
+An MGN12H installation requires the MedusaHC mounting system to be raised slightly to compensate for the different rail and carriage geometry. The required correction depends on the selected Duender parts and must be checked during assembly.
+
+#### V-Front installation
+
+There are two mounting options for a front installation:
+
+1. Keep the standard Duender front XY mounts and print the MedusaHC adapters available in the [Duender repository](https://github.com/Irbis3D/Duender).
+2. Replace the standard front mounts with the V-Front mounts contributed by GN500. These mounts include an opening for the front profile. The MGN9H versions are included in this package; an MGN12H version is available from GN500 on Printables.
+
+No other Duender kinematic changes are required for the V-Front installation. The X rail and belt path remain in their normal orientation.
+
+#### V-Back installation
+
+For a rear installation, the standard Duender front mounts remain installed. The MedusaHC docks are attached to the rear profile using the new V-Back mounting parts.
+
+Because all tools are behind the X axis, the complete X axis must be turned toward the rear:
+
+- install the new reversed left and right X-axis mounts;
+- move the X linear rail to the opposite side of the profile;
+- route the belts behind the X profile;
+- check the complete belt path and all moving clearances before homing.
+
+At the toolhead belt clamp, several belt teeth must currently be removed from the clamped section so the carriage can seat fully. A small drop of cyanoacrylate adhesive can be used to reduce the risk of belt slippage. This is a temporary assembly solution and may be redesigned later.
+
+Depending on the printer geometry and the required rear clearance, the complete Z axis together with the bed may also need to be shifted forward.
 
 ## Important notes
 
@@ -94,11 +149,11 @@ Other than that, you just need to assemble everything carefully so nothing is lo
 
 ## Electronics
 
-For this project, I use the **BTT Manta M8P** board. For a 4-hotend configuration, it can be considered the most optimal option. It has enough ports for absolutely everything, including 4 hotend heaters and even a dedicated Servo port (which is sufficient without a DC-DC converter). My configuration files are set up specifically for this board with a **CB2** module.  
+For this project, I use the **BTT Manta M8P** board. For a 4-hotend configuration, it can be considered the most optimal option. It has enough ports for absolutely everything, including 4 hotend heaters and even a dedicated Servo port (which is sufficient without a DC-DC converter). My configuration files are set up specifically for this board with a **CB2** module.
 https://s.click.aliexpress.com/e/_oktZaKt
 
-Roughly the same capabilities are provided by boards like **BTT Octopus Pro**, **Kraken**, and other “large” boards, with the main difference being that the HOST is located separately.  
-https://s.click.aliexpress.com/e/_c2wuASWJ  
+Roughly the same capabilities are provided by boards like **BTT Octopus Pro**, **Kraken**, and other “large” boards, with the main difference being that the HOST is located separately.
+https://s.click.aliexpress.com/e/_c2wuASWJ
 https://s.click.aliexpress.com/e/_c3kPDyx1
 
 When using other boards, it is possible to connect additional boards to a single host.
@@ -107,39 +162,39 @@ When using other boards, it is possible to connect additional boards to a single
 
 For each hotend, the board must have the following ports:
 
-- heater port (MOSFET-controlled; can be used either hotend heaters or the bed)  
-- thermistor port  
-- fan port (either PWM-controlled or a constant 24V port)  
-- endstop port for the endstop located on the base of that hotend  
+- heater port (MOSFET-controlled; can be used either hotend heaters or the bed)
+- thermistor port
+- fan port (either PWM-controlled or a constant 24V port)
+- endstop port for the endstop located on the base of that hotend
 
 ### Ports required for the toolhead
 
-- one extruder motor port  
-- part cooling fan port(s)  
-- toolhead endstop port  
-- port for the auto-calibration sensor (I use **BTT Eddy** connected via CAN)  
-- servo port — if the board does not have a dedicated servo port capable of supplying stable 5V under load, it is recommended to power the servo via a **24V→5V DC-DC converter** from the main power supply  
+- one extruder motor port
+- part cooling fan port(s)
+- toolhead endstop port
+- port for the auto-calibration sensor (I use **BTT Eddy** connected via CAN)
+- servo port — if the board does not have a dedicated servo port capable of supplying stable 5V under load, it is recommended to power the servo via a **24V→5V DC-DC converter** from the main power supply
 
 ### Power considerations
 
 Additional hotends require additional power from the PSU.
 
-From experience, a standard **350W** power supply is reliably sufficient for **2 hotends**.  
-For **3 hotends**, it can be enough with a high-quality PSU.  
+From experience, a standard **350W** power supply is reliably sufficient for **2 hotends**.
+For **3 hotends**, it can be enough with a high-quality PSU.
 For **4 hotends**, it is definitely not enough.
 
 In my setup with the **Manta M8P**, I use one **350W** power supply for the heated bed, and another **350W** power supply for everything else.
 
 ## Configuration setup
 
-The main printer parameters, as before, are located in the `printer.cfg` file.  
+The main printer parameters, as before, are located in the `printer.cfg` file.
 In general, the configuration is no different from a standard Duender config.
 
 The exception is that the extruder configuration block has been moved into the MedusaHC configuration file. More on this below.
 
 ### Additional modules
 
-Personally, I use **klipper-tmc-autotune** for tuning motor drivers.  
+Personally, I use **klipper-tmc-autotune** for tuning motor drivers.
 (This is optional.)
 
 ### Display and sensors
@@ -148,8 +203,9 @@ In my opinion, the optimal screen is **BTT HDMI5**.
 
 https://s.click.aliexpress.com/e/_c4odBUeJ
 
-I also use the **Eddy-ng** module for auto-calibration and nozzle tap probing.  
-In my setup, Eddy is connected via **CAN** (to save USB ports).
+I use **BTT Eddy** connected through CAN. V0.2 no longer uses Eddy-ng or a modified `probe_eddy_ng.py` file. Eddy tap probing is handled by current Klipper functionality.
+
+Eddy tap can automatically calibrate the Z relationship between tools. Full X/Y/Z tool calibration requires a separate contact calibration sensor, such as SexBall, Nudge, or a similar device supported by klipper-toolchanger.
 
 ## Arcs support
 
@@ -161,24 +217,31 @@ On weak HOST systems, problems were observed with this feature. In such cases, i
 
 ### sensorless.cfg
 
-This file has been modified quite heavily to make parking safer and to improve parking repeatability without endstops.
+This file has been modified quite heavily to make sensorless homing safer and to improve repeatability without physical XY endstops.
 
-Parking is performed in the back-left corner (**X = min, Y = max**).  
-First, the **Y axis** is parked (to avoid hitting hotends on the bases), then **X**, with small side movements. After that, **Y and X** are parked once again.
+The safe parking and homing side depends on the dock layout:
 
-This ensures that the final parking always happens from the same distance relative to zero.
+- with **V-Front**, park away from the docks, toward the rear of the printer;
+- with **V-Back**, park away from the docks, toward the front of the printer.
+
+The exact coordinates depend on the printer. Check the homing sequence and every parking move before testing at normal speed. Parking positions used by `END_PRINT`, `PAUSE`, `RESUME`, `CANCEL_PRINT`, calibration macros, and service macros must also be adjusted for the selected layout.
+
+The supplied Duender 4-tool configuration uses front docks and rear parking.
 
 ### line_purge.cfg
 
 Modified so that the purge line is printed not along the X axis, but on the left side of the bed along the Y axis.
 
-In my setup, **Adaptive** is disabled, so the line is always printed in the same place. It can be enabled if desired, in which case the line will be printed closer to the model.  
+In my setup, **Adaptive** is disabled, so the line is always printed in the same place. It can be enabled if desired, in which case the line will be printed closer to the model.
 (Optional.)
 
 ### klipperScreen.conf
 
-A menu with buttons for the main **MHC macros** has been added.  
-(Optional.)
+KlipperScreen support is optional. A custom menu can be created for the main MedusaHC macros, but `KlipperScreen.conf` is not included in this V0.2 folder.
+
+### axiscope.cfg
+
+This experimental file is kept as a reference for camera-assisted XY calibration. The concept should be usable, but the current macros have not yet been adapted to the V0.2 configuration structure and have not been verified with this release. They may not work without changes. I plan to test and update them when possible.
 
 ### macros.cfg
 
@@ -198,9 +261,9 @@ This procedure still has some shortcomings. A visible defect may remain on the m
 
 The main files responsible for MedusaHC operation are:
 
-- `MHC_config` — configuration of all hardware related to MHC  
-- `MHC_variables` — variables for configuring various coordinates, speeds, and similar parameters  
-- `MHC_macros` — the main file containing all macros responsible for MHC functionality  
+- `MHC_config` — configuration of all hardware related to MHC
+- `MHC_variables` — variables for configuring various coordinates, speeds, and similar parameters
+- `MHC_macros` — the main file containing all macros responsible for MHC functionality
 
 And the `pin_watch.py` script — in the current version, a dedicated script is used to monitor sensor states. It listens to the sensors in real time and updates variable states accordingly. Based on this data, MHC determines what is installed where and checks for errors.
 
@@ -242,12 +305,12 @@ Since a single extruder motor is used for all tools, this block must specify the
 
 #### [extruder], [extruder1], etc.
 
-Nothing special here. All extruders share the same **step**, **dir**, and **enable** pins. The rest is standard extruder configuration.  
+Nothing special here. All extruders share the same **step**, **dir**, and **enable** pins. The rest is standard extruder configuration.
 A corresponding `extruder` block must be created for each hotend.
 
 #### [gcode_macro T0], [gcode_macro T1], etc.
 
-Mandatory macros that “create” additional tools in the system.  
+Mandatory macros that “create” additional tools in the system.
 The number of these macros must match the number of hotends.
 
 Each `T<N>` macro must declare two variables: `variable_active: 0` and `variable_color: ""`.
@@ -259,8 +322,8 @@ The last mandatory block. This defines the servo used to help open the feeder.
 
 After that come optional parameters:
 
-- fan configuration (if you are using controllable fan ports)  
-- additional heater parameters  
+- fan configuration (if you are using controllable fan ports)
+- additional heater parameters
 
 It is recommended to change heater-related parameters only if there are heating problems, and only as a last resort, preferably temporarily.
 
@@ -270,51 +333,59 @@ It is recommended to change heater-related parameters only if there are heating 
 
 #### [save_variables]
 
-This block defines the file where tool offsets are stored so they can be restored after a restart.  
+This block defines the file where tool offsets are stored so they can be restored after a restart.
 (It is required when using auto-calibration.)
 
 #### [gcode_macro TOOL_CFG]
 
 This macro contains the main coordinates and distances used in the system, as well as the speeds and accelerations for the tool change procedure.
 
-- `variable_x_t0`, `variable_x_t1`, etc. — the **X coordinate** where each hotend is mounted on its base.  
-  In this configuration, the minimum safe distance between tools is **60 mm**. With small modifications, this distance could probably be reduced slightly, but not by much — maybe **5–10 mm**.
+- `variable_tools_direction` — selects the dock orientation:
+  - `1` for **V-Front**;
+  - `-1` for **V-Back**.
 
-- `variable_y_safe` — the **Y coordinate** where the extruder with an inserted hotend can freely move left and right without hitting other hotends on their bases.  
-  In my case, this coordinate is **negative**, because I used slightly extended profiles on the Y axis. This way, I do not lose any printable area. With standard profiles, there is a chance you will lose **5–10 mm** on the Y axis.
+  This value automatically reverses the required pickup, drop, cleaning, and priming movements. Do not manually invert the individual movements in `MHC_macros.cfg`.
 
-- `variable_y_latch` — the **Y coordinate** where the toolhead fully engages with the hotend.  
+- `variable_x_t0`, `variable_x_t1`, etc. — the **X coordinate** where each hotend is mounted on its base.
+  Enter the real printer coordinates and keep the tools numbered normally from `T0` upward. The supplied Duender configuration uses **65 mm** spacing. The minimum safe spacing depends on the printed parts, hotends, wiring, and available travel.
+
+- `variable_y_safe` — the **Y coordinate** where the extruder with an inserted hotend can freely move left and right without hitting other hotends on their bases.
+  For V-Front this is normally in front of the bed; for V-Back it is behind the bed. Depending on the frame and profile lengths, the dock area may reduce usable Y travel.
+
+- `variable_y_latch` — the **Y coordinate** where the toolhead fully engages with the hotend.
   This must be set very precisely so that the toolhead presses firmly against the hotend, but without causing the motors to skip steps.
 
 - `variable_x_shift` — the distance the hotend needs to move along the X axis from `variable_x_t` in order to remove it from the base keyhole.
 
-- `variable_fast_accel`  
+- `variable_fast_accel`
 - `variable_fast_speed` — speeds and accelerations for tool changes. During the change process, there are slowdowns that are calculated as proportions of these parameters.
 
-- `variable_y_prime` — the **Y coordinate** where it is safe to prime filament into the bin.  
-- `variable_y_brush` — the **Y coordinate** of the approximate center of the nozzle cleaning brush.  
+- `variable_y_prime` — the **Y coordinate** where it is safe to prime filament into the bin.
+- `variable_y_brush` — the **Y coordinate** of the approximate center of the nozzle cleaning brush.
 - `variable_x_prime_shift` — the **X distance** from `variable_x_t` to the priming point.
 
-- `variable_e_open`  
-- `variable_e_close` — the distance and direction (in mm of filament) the extruder motor rotates to open and close the feeder latch.  
+The user only needs to select `variable_tools_direction` and enter the correct coordinates. The MedusaHC macros derive the movement direction from that setting. Parking coordinates outside the MedusaHC tool-change macros are printer-specific and must still be checked separately.
+
+- `variable_e_open`
+- `variable_e_close` — the distance and direction (in mm of filament) the extruder motor rotates to open and close the feeder latch.
   Sign sets direction: by default open is negative, close is positive. Flip the sign if your extruder is wired or mounted the other way around.
 
-- `variable_e_cur_high_mult` — multiplier applied to the extruder's base TMC `run_current` to get the boosted current used during feeder **OPEN**.  
+- `variable_e_cur_high_mult` — multiplier applied to the extruder's base TMC `run_current` to get the boosted current used during feeder **OPEN**.
   The boost is needed so the motor has enough torque to break the mechanical lock without skipping steps. Typical range: **1.3 – 1.8**.
 
 #### [gcode_macro GLOBAL_STATE]
 
 - `variable_max_tool: 4` — required by the macros to operate with the specified number of hotends.
 
-After this, there are parameters that are used internally by the macros.  
+After this, there are parameters that are used internally by the macros.
 They should **not** be changed.
 
 #### [gcode_macro TOOL_STATE_0], [gcode_macro TOOL_STATE_1] and so on
 
 Each hotend must have its own `TOOL_STATE` macro (`TOOL_STATE_0`, `TOOL_STATE_1`, and so on), where all parameters for that specific hotend are defined.
 
-- `variable_prime_amount` — the amount of filament (in mm) extruded during priming.  
-  A small value (**7–8 mm**) is suitable when printing with a draft/wipe tower.  
+- `variable_prime_amount` — the amount of filament (in mm) extruded during priming.
+  A small value (**7–8 mm**) is suitable when printing with a draft/wipe tower.
   A larger value (**14–16 mm**) can be used for printing without a tower.
 
 - `variable_prime_speed` — priming speed.
@@ -323,11 +394,11 @@ Each hotend must have its own `TOOL_STATE` macro (`TOOL_STATE_0`, `TOOL_STATE_1`
 
 - `variable_clean_move` — `1` to perform a clean move, `0` to skip it and just move to `y_safe`.
 
-- `variable_clean_move_x`
+- `variable_x_clean_move`
 
-- `variable_clean_move_y`
+- `variable_y_clean_move`
 
-- `variable_clean_move_speed` — during cleaning, the hotend moves to the center of the brush and then performs a movement away from it using the parameters defined here.  
+- `variable_clean_move_speed` — during cleaning, the hotend moves to the center of the brush and then performs a movement away from it using the parameters defined here.
   Distances: a **positive** value moves in the positive direction, a **negative** value moves in the negative direction.
 
 - `variable_clean_retract`
@@ -337,33 +408,33 @@ Each hotend must have its own `TOOL_STATE` macro (`TOOL_STATE_0`, `TOOL_STATE_1`
 
 - `variable_first_prime_flag: 1` - Do not change.
 
-- `variable_first_prime_amount` — the amount of filament (in mm) extruded during the first use of the hotend in a print.  
+- `variable_first_prime_amount` — the amount of filament (in mm) extruded during the first use of the hotend in a print.
   This value is usually larger than the regular priming amount.
 
 - `variable_first_prime_speed` — speed of the first-use priming.
 
 ## Notes
 
-Keep in mind that the lengths of these two retracts are linked to the slicer parameter **“Retraction when switching material”**.  
+Keep in mind that the lengths of these two retracts are linked to the slicer parameter **“Retraction when switching material”**.
 If the priming retract and the cleaning retract are **1 mm** each, then **“Retraction when switching material”** must be set to **2 mm**.
 
 In some situations, with certain filaments and when printing without a draft tower, these parameters require additional calibration.
 
 ## Main macros file
 
-And finally, the most important file. Nothing needs to be configured here (hopefully it will stay that way).  
-I will not describe the system operation in full detail here. I will explain it a bit more in the video.  
+And finally, the most important file. Nothing needs to be configured here (hopefully it will stay that way).
+I will not describe the system operation in full detail here. I will explain it a bit more in the video.
 Below is a short overview, just to understand the main algorithms.
 
 ---
 
 ### [delayed_gcode INIT_SENSOR_STATE]
 
-This is a special G-code that runs on startup.  
+This is a special G-code that runs on startup.
 It is responsible for:
 
-- assigning variables that depend on printer parameters  
-- initial tool assignment  
+- assigning variables that depend on printer parameters
+- initial tool assignment
 - applying tool offset values from the `saved_vars` file to the variables in `[gcode_macro TOOL_OFFSET]`
 
 ---
@@ -404,8 +475,8 @@ The **main macro responsible for all tool change procedures is `SET`**. This is 
 
 When `SET` is called with a tool parameter (`SET T=0`, `SET T=1`, etc.), the printer checks what is currently installed, based on data from the `pin_watch` script object.
 
-- If no hotend is installed, the printer will pick up the requested hotend.  
-- If a different hotend is installed, the printer will first drop it, then pick up the requested one.  
+- If no hotend is installed, the printer will pick up the requested hotend.
+- If a different hotend is installed, the printer will first drop it, then pick up the requested one.
 - If the requested hotend is already installed, the printer will simply apply the offsets for the selected tool and finish.
 
 All of this happens automatically, without the need to manually specify anything.
@@ -416,7 +487,7 @@ Thanks to the `pin_watch` script, the printer always knows its state, even if yo
 
 ### DROP macro and error handling
 
-The `DROP` macro can be used independently from `SET` to drop the currently installed hotend.  
+The `DROP` macro can be used independently from `SET` to drop the currently installed hotend.
 However, for manual dropping it is better to use the dedicated `DROP_TOOL` macro.
 
 ---
@@ -433,7 +504,7 @@ As mentioned earlier, this logic works, but still requires further optimization.
 
 ## Orca Slicer configuration
 
-All slicer settings can be viewed by opening the file `4Rca cube.3mf` as a project.
+All slicer settings can be viewed by opening `Slicer/4rcaCube_orca_project.3mf` as a project. A separate 4-tool printer preset is provided in `Slicer/Printer presets.zip`.
 
 All MHC-specific parameters are located in the printer settings.
 
@@ -443,33 +514,42 @@ The following sections are modified:
 
 - Start G-code
 
+```gcode
 CLEAR_PAUSE
 PRIME_FLAGS_SET
 M104 T0 S150
 M190 S[bed_temperature_initial_layer_single]
 G28
-OPEN
+Z_TILT_ADJUST
 CLOSE
-TAP_BASE_TOOL
 START_PRINT INITIAL_TOOL=[initial_tool] INITIAL_TEMP={first_layer_temperature[initial_tool]} EXTRUDER_TEMP={is_extruder_used[0] ? idle_temperature[0] : 0} EXTRUDER1_TEMP={is_extruder_used[1] ? idle_temperature[1] : 0} EXTRUDER2_TEMP={is_extruder_used[2] ? idle_temperature[2] : 0} EXTRUDER3_TEMP={is_extruder_used[3] ? idle_temperature[3] : 0} BED_TEMP=[bed_temperature_initial_layer_single]
 PRIME_FLAGS_CLEAR
 T{current_extruder}
 CLEAN
 LINE_PURGE
 G92 E0
+```
 
-  
+
 - End G-code
-END_PRINT
 
-- Change filament G-code  
+```gcode
+END_PRINT
+```
+
+- Change filament G-code
+
+```gcode
 T{next_extruder}
+```
 
 
 - The **Layer change G-code** also includes a modification that assigns a layer variable. It is not used at the moment, but may be useful in the future.
+```gcode
 ;AFTER_LAYER_CHANGE
 LAYER_SET L={layer_num}
 ;[layer_z]
+```
 
 
 ### Multimaterial tab
@@ -484,31 +564,32 @@ All print parameters related to multimaterial printing are also located in the *
 
 In addition, to optimize the workflow, I use a G-code post-processing script called `SET_FINISH.py`.
 
-This script slightly changes the order of movements when transitioning back to printing after a tool change.  
+This script slightly changes the order of movements when transitioning back to printing after a tool change.
 It also replaces some temperature commands that include waiting with non-waiting commands.
 
 This is done so that, when **Ooze prevention** is enabled, the printer does not wait for temperature stabilization after every tool change.
 
 Be careful with **Ooze prevention** settings. The heating time must always be sufficient for the hotend to reach the target temperature.
 
-To use this script, **Python must be installed on the computer**.  
+To use this script, **Python must be installed on the computer**.
 You must specify the path to Python and to the script itself in the **Others** tab, in the **Post-processing Scripts** section.
 
-In my case, this block looks like this:
+The path stored in a 3MF project is computer-specific. Replace both paths with the actual Python executable and the copy of the script on your computer. A typical command has this form:
 
 ```
 
-"C:\Users\their\AppData\Local\Python\pythoncore-3.14-64\python.exe" "C:\Firmware\Medusa HC Beta CONFIG\SET_FINISH.py" 12
-;
+"C:\path\to\python.exe" "C:\path\to\SET_FINISH.py" 12
 
 ```
+
+`SET_FINISH_Snapmaker_Orca.py` is also included for the alternative workflow used with Snapmaker Orca. See the `Scripts` folder README before selecting a post-processing script.
 
 ## Tool offset calibration
 
-Offsets work relative to the first tool.  
+Offsets work relative to the first tool.
 That means all offsets for **T0** are equal to `0`, and all other tools are calculated relative to **T0**.
 
-Keep in mind that this system uses **G-code offsets**.  
+Keep in mind that this system uses **G-code offsets**.
 That is, how much the entire coordinate system needs to be shifted so that the hotend ends up in the same position as **T0**.
 
 Do not confuse this with *tool offset*, where the value indicates how much the hotend itself is shifted from the desired point.
@@ -519,7 +600,7 @@ As a result, **tool offset has the opposite sign of the G-code offset**.
 
 ### Manual tool offset calibration
 
-In the `MHC_macros` file, inside the `INIT_SENSOR_STATE` macro, you need to comment out  
+In the `MHC_macros` file, inside the `INIT_SENSOR_STATE` macro, you need to comment out
 (add `#` at the beginning of each line) the entire **“Initial tool offset setup”** block.
 
 ---
@@ -534,7 +615,7 @@ Lower each hotend to the bed and calculate the offset relative to the first hote
 
 ### XY offset calibration
 
-For this, you need to print special calibration models.  
+For this, you need to print special calibration models.
 I used this one:
 
 https://www.printables.com/model/129617-offset-xy-dual-extruder-idex-calibration
@@ -546,109 +627,81 @@ Place **one fewer copy** of this model than the number of hotends on the bed.
 
 Keep in mind that this test shows **tool offset**, so for MHC you need to **invert the sign** of the obtained values.
 
-The resulting offsets must be written into the corresponding variables in the  
+The resulting offsets must be written into the corresponding variables in the
 `MHC_variables` file, inside the `TOOL_OFFSET` macro.
 
 ---
 
-## Automatic Z offset calibration using Eddy-ng
+## Automatic Z offset calibration using native Eddy tap
 
-Basic Eddy-ng installation is done according to the standard instructions.
+V0.2 no longer requires Eddy-ng or a modified `probe_eddy_ng.py` file. The supplied `eddy_config.cfg` and `eddy_features.cfg` use native Klipper Eddy tap probing.
 
-The Eddy mount in this project is made without adjustment and fits the Bambulab hotend clones that I use.
+The Eddy mount has no height adjustment and was designed around the hotend arrangement used in this project. Eddy is sensitive to installation height, so verify the mount position and probe operation before running automatic calibration.
 
-Eddy is quite sensitive to installation height, so you may need to slightly shift the holes in the model and reprint the mount.
+Without a separate tool-calibration sensor, Eddy tap can calibrate the **Z offset only**. It cannot determine the X and Y relationship between tools.
 
-The standard Eddy-ng feature set does **not** support working with multiple tools.
+Automatic Z calibration of all configured tools can be started with:
 
-For auto-calibration to work, you must replace the `probe_eddy_ng.py` script located in:
-
-```
-
-/home/biqu/eddy-ng
-
-```
-
-with the modified `probe_eddy_ng.py` from this project.
-
-This version can pass the required data to calculate offsets for all tools.
-
-To enable auto-calibration, you need to include the file `eddy_ng_features.cfg`.  
-It contains all the required macros.
-
-Automatic calibration of all available tools can be started with the macro:
-
-```
-
+```gcode
 TOOL_Z_CALIBRATION
-
 ```
 
-For accurate calibration, make sure the nozzles of all tools are clean.
+The macro uses T0 as the reference, probes every configured tool, saves the calculated Z offsets to `saved_vars.cfg`, and applies them again during printer initialization.
 
-After auto-calibration, the calculated offsets are saved to the `saved_vars` file and will be applied on every printer startup.
+For accurate results, make sure every nozzle is clean before calibration.
 
 ---
 
-## Full auto-calibration using Sexball
+## Full X/Y/Z auto-calibration
 
-Theoretically, I have an almost working script for auto-calibration using the Sexball sensor.  
-However, I am not satisfied with how the values are calculated.
+Full automatic calibration requires a contact calibration sensor supported by **klipper-toolchanger**. SexBall, Nudge, and similar sensors can be used. The sensor must allow the nozzle to be located in X, Y, and Z.
 
-Because of this, I added the ability to partially integrate the **klipper-toolchanger** plugin by Viesturs Zariņš into MHC:
+MedusaHC integrates the **klipper-toolchanger** plugin by Viesturs Zariņš for this function:
 
 https://github.com/viesturz/klipper-toolchanger
 
 The plugin is installed using the command from its manual:
 
-```
-
-wget -O - [https://raw.githubusercontent.com/viesturz/klipper-toolchanger/main/install.sh](https://raw.githubusercontent.com/viesturz/klipper-toolchanger/main/install.sh) | bash
-
+```bash
+wget -O - https://raw.githubusercontent.com/viesturz/klipper-toolchanger/main/install.sh | bash
 ```
 
 Configuration settings for klipper-toolchanger are located in `toolchanger.cfg`.
 
 The configuration is minimal:
 
-- a `[toolchanger]` block with everything disabled  
-- one `[tool T0]`, `[tool T1]`, etc. block for each hotend  
+- a `[toolchanger]` block with everything disabled
+- one `[tool T0]`, `[tool T1]`, etc. block for each hotend
 
-In practice, klipper-toolchanger does almost nothing.  
-All MHC functionality still works exactly as before.
-
-The only thing klipper-toolchanger needs for auto-calibration is to know which tool is currently active and to expose calibration results back to MHC macros.
+MedusaHC continues to handle the actual tool changes. Klipper-toolchanger is used to track the active tool, run the calibration sensor routines, and expose the calibration results to the MedusaHC macros.
 
 To synchronize MHC state with it, you must set:
 
-```
-
+```ini
 sync_toolchanger: 1
-
 ```
 
 in the `[pin_watch io]` script configuration.
 
-Calibration results are read by MHC macros directly from `printer.tools_calibrate.last_x_result / last_y_result / last_z_result`, which the stock klipper-toolchanger already exposes. **No script modifications are required** — the original `tools_calibrate.py` is used as-is, and klipper-toolchanger can be updated normally (including automatic updates via `moonraker.conf`).
+Calibration results are read directly from `printer.tools_calibrate.last_x_result`, `last_y_result`, and `last_z_result`. The stock `tools_calibrate.py` from klipper-toolchanger is used without modification, so klipper-toolchanger can be updated normally.
 
 ---
 
 ## Auto-calibration settings
 
-The base auto-calibration settings have not changed.  
-They are located in `calibrate-offsets.cfg`, in the `[tools_calibrate]` block.
+The full X/Y/Z calibration settings are located in `calibrate-offsets.cfg`, in the `[tools_calibrate]` block.
 
-In the `CALIBRATE_MOVE_OVER_PROBE` macro, you must specify an approximate point above the center of the Sexball sphere. The point is configured via the `variable_probe_x`, `variable_probe_y`, `variable_probe_z` variables defined at the top of that macro in `calibrate-offsets.cfg`.
+In `CALIBRATE_MOVE_OVER_PROBE`, specify an approximate position above the center of the installed calibration sensor. The position is configured with `variable_probe_x`, `variable_probe_y`, and `variable_probe_z`.
 
 The MHC version of `calibrate-offsets.cfg` is included in this project. It wraps the stock `TOOL_CALIBRATE_TOOL_OFFSET` command from klipper-toolchanger and pulls the result into the MHC `TOOL_OFFSET` variables and `saved_vars` automatically — no patching of klipper-toolchanger internals.
 
 For fully automatic calibration with saving and applying all offsets, run the macro:
 
-```
-
+```gcode
 CALIBRATE_AND_SAVE_OFFSETS
-
 ```
+
+If no SexBall, Nudge, or similar contact sensor is installed, do not use the full calibration procedure. Use native Eddy tap for Z and calibrate X/Y manually with printed tests or another suitable method.
 
 ---
 
@@ -658,7 +711,7 @@ This project is fully open source. You are free to use it, modify it, and build 
 
 If you find the project useful, any kind of support helps — it allows me to spend more time on development, testing, and experiments. The project will be updated gradually, as new ideas appear and as I have the time and resources to work on it.
 
-Most discussions about this project and similar toolchanger concepts take place on my  
+Most discussions about this project and similar toolchanger concepts take place on my
 Discord server:
 
 https://discord.gg/ae44FHv786
