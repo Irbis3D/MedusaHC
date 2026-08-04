@@ -64,6 +64,8 @@ Discord server - https://discord.gg/ae44FHv786
 - Updated OrcaSlicer projects, a 4-tool printer preset, and post-processing scripts are included.
 - Experimental camera-assisted XY calibration files are retained as a reference but are not yet adapted to the V0.2 configuration.
 
+See [CHANGELOG.md](CHANGELOG.md) for the complete V0.2 release notes.
+
 ## Documentation and audience
 
 For a general understanding, I recommend watching the first video about this project on my YouTube channel. You will not find all the information there, but you can get a general idea of how it works.
