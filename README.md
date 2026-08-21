@@ -34,8 +34,15 @@ An experimental Python implementation is available separately in
 [MedusaHC-Python-Controller](https://github.com/Irbis3D/MedusaHC-Python-Controller).
 It keeps the familiar MedusaHC commands and configuration structure while
 moving pickup, parking, feeder, priming, cleaning and sensor verification into
-a Klipper Python module. Read its migration and rollback instructions before
-testing it on a printer.
+a Klipper Python module. This version performs tool changes faster by avoiding
+the chained macro execution and unnecessary fixed waits used by the original
+implementation.
+
+The Python controller is still experimental and is currently undergoing active
+testing. It should be installed only by users who are prepared to supervise
+tool changes, report problems and restore the macro version if necessary. Read
+its migration and rollback instructions and keep a complete printer backup
+before testing it.
 
 The optional [MedusaHC Control](https://github.com/Irbis3D/MedusaHC-Control/releases)
 panel is published in separate Macro and Python editions. Choose the edition
