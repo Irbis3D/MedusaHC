@@ -25,6 +25,22 @@ Your support helps me create more content, upgrade gear, and keep experimenting 
 
 Also, by buying parts using my links, you help as well.
 
+## Software options
+
+The standard MedusaHC configuration in this repository uses the macro-based
+tool-change controller.
+
+An experimental Python implementation is available separately in
+[MedusaHC-Python-Controller](https://github.com/Irbis3D/MedusaHC-Python-Controller).
+It keeps the familiar MedusaHC commands and configuration structure while
+moving pickup, parking, feeder, priming, cleaning and sensor verification into
+a Klipper Python module. Read its migration and rollback instructions before
+testing it on a printer.
+
+The optional [MedusaHC Control](https://github.com/Irbis3D/MedusaHC-Control/releases)
+panel is published in separate Macro and Python editions. Choose the edition
+that matches the controller already installed on the printer.
+
 ## Credits
 
 This project uses some work and ideas from the Dragonburner project by chirpy2605:
