@@ -419,7 +419,7 @@ Each hotend must have its own `TOOL_STATE` macro (`TOOL_STATE_0`, `TOOL_STATE_1`
 
 - `variable_prime_retract`, `variable_prime_retract_speed` — length and speed of the retract after priming.
 
-- `variable_clean_move` — `1` to perform a clean move, `0` to skip it and just move to `y_safe`.
+- `variable_clean_move` — `1` to perform the complete PTFE and brush-cleaning sequence after priming; `0` to skip all cleaning movements and move directly to `y_safe`.
 
 - `variable_x_clean_move`
 
@@ -433,7 +433,9 @@ Each hotend must have its own `TOOL_STATE` macro (`TOOL_STATE_0`, `TOOL_STATE_1`
 - `variable_clean_retract_speed` — additional retract after cleaning.
 
 
-- `variable_first_prime_flag: 1` - Do not change.
+- `variable_first_prime_enabled` — `1` to enable first-use priming for this tool, `0` to disable it.
+
+- `variable_first_prime_flag: 1` — internal runtime state managed by the macros. Do not change it manually.
 
 - `variable_first_prime_amount` — the amount of filament (in mm) extruded during the first use of the hotend in a print.
   This value is usually larger than the regular priming amount.
