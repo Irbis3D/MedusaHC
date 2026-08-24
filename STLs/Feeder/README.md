@@ -12,4 +12,4 @@ The new linkage makes the servo rotate in the opposite direction. Reconfigure an
 
 Some parts received major mechanical changes, while others only gained minor improvements such as rounded edges. Reprinting the complete feeder set is recommended: there are relatively few parts, and the feeder must be disassembled for the upgrade anyway.
 
-The mechanism must move freely without excessive play. Print quality, bearing and pin alignment, spring selection, and surface finishing directly affect reliable opening and closing. Refer to `MedusaHC_Feeder_Lever_MOD.step` to confirm orientation and hardware placement.
+The mechanism must move freely without excessive play. Print quality, bearing and pin alignment, spring selection, and surface finishing directly affect reliable opening and closing. Refer to [`MedusaHC_Feeder_Lever_MOD.step`](../../STEP/MedusaHC_Feeder_Lever_MOD.step) to confirm orientation and hardware placement. This separate assembly documents the experimental feeder; it has not yet been incorporated into the main MedusaHC STEP assembly.
