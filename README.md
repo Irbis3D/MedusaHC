@@ -17,6 +17,8 @@ For the exact terms, see the LICENSE file.
 
 If you have the ability and desire to support the project, you can do it in several ways:
 
+https://irbis3d.xyz/
+
 - Patreon — monthly support: https://patreon.com/Irbis3D
 - Ko-fi / Buy Me a Coffee — one-time donations: https://buymeacoffee.com/Irbis3D
 - YouTube Super Thanks — under any video: https://youtube.com/@Irbis3D
