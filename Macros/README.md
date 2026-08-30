@@ -8,7 +8,8 @@ The main MedusaHC files are:
 
 - `MHC_config.cfg` — tool sensors, shared extruder hardware, heaters, fans, servo, and tool commands.
 - `MHC_variables.cfg` — tool count, layout orientation, dock coordinates, cleaning/priming settings, and stored offsets.
-- `MHC_macros.cfg` — pickup, drop, feeder, cleaning, priming, error handling, and offset logic.
+- `MHC_macros.cfg` — the public macro interface and small compatibility wrappers for the Python controller.
+- `medusahc.py` from the `Scripts` folder — pickup, drop, feeder, cleaning, priming, error handling, and offset logic.
 - `pin_watch.py` from the `Scripts` folder — real-time tool sensor monitoring.
 
 ## Layout selection
@@ -22,17 +23,27 @@ Then enter the actual X/Y coordinates for the installed docks. Pickup, drop, cle
 
 ## Probe selection
 
-The example enables native Klipper Eddy support through `eddy_config.cfg` and `eddy_features.cfg`.
+The example enables native Klipper Eddy support through `eddy_config.cfg`.
 
 `bltouch.cfg` is an alternative backup configuration. Do not enable Eddy and BLTouch probe sections at the same time without resolving duplicate sections and pins. A BLTouch setup also requires manual review of `START_PRINT`, including the Eddy-specific `TAP_BASE_TOOL` call.
+
+Tool-offset auto-calibration is intentionally not bundled into this base
+configuration. Install the optional MedusaHC-Calibrate module when automatic
+SexBall/contact, Eddy Tap Z, or Eddy Tap + EddySeek XYZ calibration is needed.
 
 ## External components
 
 Some active sections depend on software installed separately:
 
-- klipper-toolchanger and its stock `tools_calibrate.py` for full X/Y/Z calibration;
 - `pin_watch.py`, which must be copied to the Klipper `klippy/extras` directory;
+- `medusahc.py`, which must be copied to the same Klipper `klippy/extras` directory;
 - optional klipper-tmc-autotune;
 - standard installation-specific files such as `mainsail.cfg` and `timelapse.cfg`.
 
-`axiscope.cfg` is experimental. Its current macros have not been adapted to the V0.2 configuration structure and may not work without changes.
+`pin_watch.py` retains optional, disabled-by-default compatibility
+synchronization with `klipper-toolchanger`. MedusaHC does not install or
+require that plugin. A minimal optional configuration is documented in the
+main project README.
+
+Camera-assisted tool calibration is not currently included. A new native or
+adapted implementation may be added later.

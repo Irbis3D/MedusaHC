@@ -2,6 +2,25 @@
 
 This file summarizes the major public changes between MedusaHC releases. The project is still in beta, so every configuration must be reviewed and adapted to the actual printer before use.
 
+## Unreleased
+
+- Made the tested Python tool-change controller the default implementation on
+  `main` and preserved the final macro implementation in the frozen
+  `legacy-macros` branch.
+- Hid internal state and compatibility helpers from the Mainsail macro panel
+  while retaining the established public commands and slicer compatibility.
+- Moved automatic tool-offset calibration into the independent
+  MedusaHC-Calibrate module.
+- Removed the bundled legacy klipper-toolchanger calibration and example
+  configuration files from the base MedusaHC setup.
+- Kept optional pin-watch synchronization with klipper-toolchanger, disabled by
+  default for users who configure that plugin separately.
+- The base configuration now contains normal MedusaHC operation and native
+  printer probe configuration; optional calibration modules can be installed or
+  removed independently.
+- Added explicit per-tool first-use retract settings to the configuration
+  template for the planned Python-controller migration.
+
 ## V0.2 Beta — 2026-08-04
 
 V0.2 is a major mechanical, configuration, calibration, and repository update. It adds two supported dock orientations, refreshes the common tool hardware, replaces Eddy-ng with native Klipper Eddy tap support, and provides a new four-tool Duender example configuration.
@@ -78,11 +97,6 @@ V0.2 is a major mechanical, configuration, calibration, and repository update. I
 - Added automatic transfer of the latest klipper-toolchanger calibration results into MedusaHC tool-offset variables and `saved_vars.cfg`.
 - Updated `CALIBRATE_AND_SAVE_OFFSETS` to select each tool, reset the selected tool offset at the correct point in the loop, run calibration, and save the results.
 - Without a contact calibration sensor, native Eddy tap can calibrate Z only. X and Y must be calibrated manually or by another suitable method.
-
-### Axiscope status
-
-- Retained `axiscope.cfg` as an experimental reference for camera-assisted XY calibration.
-- The concept should still be usable, but the current Axiscope macros have not been adapted to the V0.2 configuration structure and are not verified for this release.
 
 ### OrcaSlicer and post-processing
 

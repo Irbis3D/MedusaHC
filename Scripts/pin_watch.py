@@ -2,7 +2,7 @@
 #
 # - Computes tool state from pin events (e, t0..tN) and exposes it as:
 #     printer["pin_watch <name>"].current_tool
-# - Does NOT write GLOBAL_STATE.
+# - Does NOT write _GLOBAL_STATE.
 # - Optional toolchanger sync:
 #     * While printing: only INITIALIZE_TOOLCHANGER when ct >= 0 (never UNSELECT)
 #     * While not printing: ct >= 0 -> INITIALIZE_TOOLCHANGER, else -> UNSELECT_TOOL
@@ -30,7 +30,7 @@ class PinWatch:
         self.buttons = self.printer.load_object(config, "buttons")
 
         self.toolchanger_name = config.get("toolchanger", "toolchanger")
-        self.sync_toolchanger = int(config.get("sync_toolchanger", 1)) != 0
+        self.sync_toolchanger = int(config.get("sync_toolchanger", 0)) != 0
         # Mainsail/Fluidd UI sync (two independent toggles).
         self.sync_mainsail_tools = int(config.get("sync_mainsail_tools", 0)) != 0
         self.sync_mainsail_sensors = int(config.get("sync_mainsail_sensors", 0)) != 0

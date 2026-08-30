@@ -29,26 +29,37 @@ Also, by buying parts using my links, you help as well.
 
 ## Software options
 
-The standard MedusaHC configuration in this repository uses the macro-based
-tool-change controller.
+> [!IMPORTANT]
+> The `main` branch now uses the Python-based tool-change controller. It has
+> completed extended testing on the development printer, has proven reliable,
+> and is the strongly recommended implementation for new and existing
+> installations. Current optional MedusaHC modules are developed against it.
 
-An experimental Python implementation is available separately in
-[MedusaHC-Python-Controller](https://github.com/Irbis3D/MedusaHC-Python-Controller).
-It keeps the familiar MedusaHC commands and configuration structure while
-moving pickup, parking, feeder, priming, cleaning and sensor verification into
-a Klipper Python module. This version performs tool changes faster by avoiding
-the chained macro execution and unnecessary fixed waits used by the original
-implementation.
+The controller keeps the familiar MedusaHC commands and configuration
+structure while moving pickup, parking, feeder, priming, cleaning, and sensor
+verification into the Klipper Python module `medusahc.py`. This avoids the
+chained execution and unnecessary fixed waits of the original macro controller.
 
-The Python controller is still experimental and is currently undergoing active
-testing. It should be installed only by users who are prepared to supervise
-tool changes, report problems and restore the macro version if necessary. Read
-its migration and rollback instructions and keep a complete printer backup
-before testing it.
+The final working macro-based implementation is preserved in the frozen
+[`legacy-macros`](https://github.com/Irbis3D/MedusaHC/tree/legacy-macros)
+branch. It retains the old klipper-toolchanger calibration workflow and is
+provided for compatibility and rollback, but new functionality is not planned
+for that branch. Migration to the Python controller is strongly recommended.
 
 The optional [MedusaHC Control](https://github.com/Irbis3D/MedusaHC-Control/releases)
 panel is published in separate Macro and Python editions. Choose the edition
 that matches the controller already installed on the printer.
+
+Optional features are kept in separate projects so they can be installed and
+updated independently:
+
+- [MedusaHC-Calibrate](https://github.com/Irbis3D/MedusaHC-Calibrate) — automatic
+  tool-offset calibration using a contact sensor, native Eddy Tap, or Eddy Tap
+  together with a stationary Eddy Coil and EddySeek;
+- [MedusaHC-Mainsail](https://github.com/Irbis3D/MedusaHC-Mainsail) — experimental
+  Mainsail integration for the MedusaHC Control panel.
+
+The base MedusaHC configuration does not require either optional module.
 
 ## Credits
 
@@ -80,14 +91,16 @@ Discord server - https://discord.gg/ae44FHv786
 
 ## What is new in V0.2
 
-- V-Front and V-Back dock layouts use the same main tool-change macros.
+- V-Front and V-Back dock layouts use the same Python tool-change controller.
 - `variable_tools_direction` automatically reverses layout-dependent pickup, drop, cleaning, and priming movements.
 - The supplied configuration uses four tools numbered normally from `T0` to `T3`.
 - The base, nozzle-cleaning, PTFE-cleaning, priming, and wire-management parts have been updated.
-- Native Klipper Eddy tap replaces Eddy-ng for Z probing and Z-only tool calibration.
-- Full X/Y/Z calibration is handled through klipper-toolchanger with SexBall, Nudge, or a similar contact sensor.
+- Native Klipper Eddy tap replaces Eddy-ng for Z probing.
+- Automatic tool-offset calibration is available separately through
+  MedusaHC-Calibrate and does not require klipper-toolchanger.
 - Updated OrcaSlicer projects, a 4-tool printer preset, and post-processing scripts are included.
-- Experimental camera-assisted XY calibration files are retained as a reference but are not yet adapted to the V0.2 configuration.
+- Camera-assisted tool calibration is not currently supported. A new native or
+  adapted camera module may be developed later.
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete V0.2 release notes.
 
@@ -232,7 +245,10 @@ https://s.click.aliexpress.com/e/_c4odBUeJ
 
 I use **BTT Eddy** connected through CAN. V0.2 no longer uses Eddy-ng or a modified `probe_eddy_ng.py` file. Eddy tap probing is handled by current Klipper functionality.
 
-Eddy tap can automatically calibrate the Z relationship between tools. Full X/Y/Z tool calibration requires a separate contact calibration sensor, such as SexBall, Nudge, or a similar device supported by klipper-toolchanger.
+Native Eddy Tap can be used by the optional MedusaHC-Calibrate module to
+measure the Z relationship between tools. Full X/Y/Z calibration can use a
+SexBall-style contact sensor or combine Eddy Tap for Z with a stationary Eddy
+Coil and EddySeek for XY.
 
 ## Arcs support
 
@@ -266,9 +282,12 @@ In my setup, **Adaptive** is disabled, so the line is always printed in the same
 
 KlipperScreen support is optional. A custom menu can be created for the main MedusaHC macros, but `KlipperScreen.conf` is not included in this V0.2 folder.
 
-### axiscope.cfg
+### Camera calibration
 
-This experimental file is kept as a reference for camera-assisted XY calibration. The concept should be usable, but the current macros have not yet been adapted to the V0.2 configuration structure and have not been verified with this release. They may not work without changes. I plan to test and update them when possible.
+Camera-assisted tool calibration is not currently supported. The previous
+experimental example was not compatible with the current configuration and
+has been removed. A new native implementation or an integration with another
+project may be added later.
 
 ### macros.cfg
 
@@ -316,7 +335,10 @@ All (or at least almost all) macros are designed to be universal and work with a
 
 This block configures the `pin_watch` script.
 
-- `sync_toolchanger: 1` — enables tool initialization in klipper-toolchanger (used for auto-calibration; explanation later).
+- `sync_toolchanger: 0` — optional compatibility synchronization with
+  klipper-toolchanger. It is disabled by default and is not required by
+  MedusaHC or MedusaHC-Calibrate. Enable it only after installing and minimally
+  configuring klipper-toolchanger separately.
 - `sync_mainsail_tools: 1` — highlights the active tool button in the Mainsail/Fluidd tools panel. When a tool is successfully picked up, the corresponding `T<N>` button gets `variable_active = 1`, others get `0`.
 - `sync_mainsail_sensors: 1` — turns each tool's button into a state indicator lamp via `variable_color`. The active tool is shown in blue, parked tools (endstop pressed) in green, missing tools (endstop released) in red. The lamp is updated immediately from pin edges, so anomalies are visible in real time.
 - `color_active`, `color_pressed`, `color_released` — hex colors (without `#`) used by the indicator lamp. Defaults: blue / green / red.
@@ -324,7 +346,8 @@ This block configures the `pin_watch` script.
 - `pin_e` — microswitch pin located on the toolhead.
 - `pin_t0`, `pin_t1`, etc. — microswitch pins on the bases of the corresponding hotends.
 
-Each sync feature is independent and defaults to off in fresh installs — enable only the ones you want.
+Each sync feature is independent. Enable only the integrations you actually
+use.
 
 #### [duplicate_pin_override]
 
@@ -363,7 +386,7 @@ It is recommended to change heater-related parameters only if there are heating 
 This block defines the file where tool offsets are stored so they can be restored after a restart.
 (It is required when using auto-calibration.)
 
-#### [gcode_macro TOOL_CFG]
+#### [gcode_macro _TOOL_CFG]
 
 This macro contains the main coordinates and distances used in the system, as well as the speeds and accelerations for the tool change procedure.
 
@@ -400,16 +423,16 @@ The user only needs to select `variable_tools_direction` and enter the correct c
 - `variable_e_cur_high_mult` — multiplier applied to the extruder's base TMC `run_current` to get the boosted current used during feeder **OPEN**.
   The boost is needed so the motor has enough torque to break the mechanical lock without skipping steps. Typical range: **1.3 – 1.8**.
 
-#### [gcode_macro GLOBAL_STATE]
+#### [gcode_macro _GLOBAL_STATE]
 
 - `variable_max_tool: 4` — required by the macros to operate with the specified number of hotends.
 
 After this, there are parameters that are used internally by the macros.
 They should **not** be changed.
 
-#### [gcode_macro TOOL_STATE_0], [gcode_macro TOOL_STATE_1] and so on
+#### [gcode_macro _TOOL_STATE_0], [gcode_macro _TOOL_STATE_1] and so on
 
-Each hotend must have its own `TOOL_STATE` macro (`TOOL_STATE_0`, `TOOL_STATE_1`, and so on), where all parameters for that specific hotend are defined.
+Each hotend must have its own `TOOL_STATE` macro (`_TOOL_STATE_0`, `_TOOL_STATE_1`, and so on), where all parameters for that specific hotend are defined.
 
 - `variable_prime_amount` — the amount of filament (in mm) extruded during priming.
   A small value (**7–8 mm**) is suitable when printing with a draft/wipe tower.
@@ -464,7 +487,7 @@ It is responsible for:
 
 - assigning variables that depend on printer parameters
 - initial tool assignment
-- applying tool offset values from the `saved_vars` file to the variables in `[gcode_macro TOOL_OFFSET]`
+- applying tool offset values from the `saved_vars` file to the variables in `[gcode_macro _TOOL_OFFSET]`
 
 ---
 
@@ -492,15 +515,15 @@ I also added this procedure to the slicer start G-code, so this issue should def
 
 ---
 
-### Tool change macros: SET, DROP and sub-macros
+### Python tool-change controller
 
-Next come the `SET` and `DROP` macros and their sub-macros.
+The physical pickup, drop, feeder, cleaning, priming, offset, and verification
+logic is implemented by `Scripts/medusahc.py`. The short public macros retain
+the familiar Mainsail and slicer interface without exposing internal helper
+commands.
 
-Splitting procedures into multiple macros is required, because within a single macro the firmware does not see variable updates. I will explain this in more detail in the video.
-
-In general terms:
-
-The **main macro responsible for all tool change procedures is `SET`**. This is the macro called by the `T` macros.
+The **main command responsible for tool changes is `SET`**. It is also called
+by the `T` macros.
 
 When `SET` is called with a tool parameter (`SET T=0`, `SET T=1`, etc.), the printer checks what is currently installed, based on data from the `pin_watch` script object.
 
@@ -514,10 +537,11 @@ Thanks to the `pin_watch` script, the printer always knows its state, even if yo
 
 ---
 
-### DROP macro and error handling
+### Dropping a tool and error handling
 
-The `DROP` macro can be used independently from `SET` to drop the currently installed hotend.
-However, for manual dropping it is better to use the dedicated `DROP_TOOL` macro.
+Use the public `DROP_TOOL` command to park the currently installed hotend.
+`DROP` is retained only as an internal compatibility command and is not shown
+as a user macro.
 
 ---
 
@@ -527,7 +551,8 @@ If after dropping or picking up a hotend the script detects that the sensor stat
 
 After fixing the problem and resuming, the printer will pick up the planned tool and continue printing.
 
-As mentioned earlier, this logic works, but still requires further optimization.
+The frozen macro implementation and its original chained helper macros remain
+available in the `legacy-macros` branch.
 
 ---
 
@@ -545,7 +570,7 @@ The following sections are modified:
 
 ```gcode
 CLEAR_PAUSE
-PRIME_FLAGS_SET
+_PRIME_FLAGS_SET
 M104 T0 S150
 M190 S[bed_temperature_initial_layer_single]
 G28
@@ -576,7 +601,7 @@ T{next_extruder}
 - The **Layer change G-code** also includes a modification that assigns a layer variable. It is not used at the moment, but may be useful in the future.
 ```gcode
 ;AFTER_LAYER_CHANGE
-LAYER_SET L={layer_num}
+_LAYER_SET L={layer_num}
 ;[layer_z]
 ```
 
@@ -657,80 +682,62 @@ Place **one fewer copy** of this model than the number of hotends on the bed.
 Keep in mind that this test shows **tool offset**, so for MHC you need to **invert the sign** of the obtained values.
 
 The resulting offsets must be written into the corresponding variables in the
-`MHC_variables` file, inside the `TOOL_OFFSET` macro.
+`MHC_variables` file, inside the `_TOOL_OFFSET` macro.
 
 ---
 
-## Automatic Z offset calibration using native Eddy tap
+## Optional automatic tool-offset calibration
 
-V0.2 no longer requires Eddy-ng or a modified `probe_eddy_ng.py` file. The supplied `eddy_config.cfg` and `eddy_features.cfg` use native Klipper Eddy tap probing.
+Automatic calibration is maintained as the independent
+[MedusaHC-Calibrate](https://github.com/Irbis3D/MedusaHC-Calibrate) module. It is
+not required for normal MedusaHC operation and can be installed, updated, or
+removed without replacing the base MedusaHC configuration.
 
-The Eddy mount has no height adjustment and was designed around the hotend arrangement used in this project. Eddy is sensitive to installation height, so verify the mount position and probe operation before running automatic calibration.
+The module provides three calibration methods:
 
-Without a separate tool-calibration sensor, Eddy tap can calibrate the **Z offset only**. It cannot determine the X and Y relationship between tools.
+- full X/Y/Z calibration with a SexBall-style contact sensor;
+- Z-only calibration with native Klipper Eddy Tap;
+- full X/Y/Z calibration using native Eddy Tap for Z and a stationary BTT Eddy
+  Coil with [EddySeek](https://github.com/charliemayall/EddySeek) for XY.
 
-Automatic Z calibration of all configured tools can be started with:
+All methods use T0 as the reference, store the resulting G-code offsets in
+`saved_vars.cfg`, and apply them through the existing MedusaHC offset macros.
+Installation, sensor coordinates, safe travel limits, contact directions,
+EddySeek setup, and validation procedures are documented in the calibration
+module repository.
 
-```gcode
-TOOL_Z_CALIBRATION
-```
+The legacy `klipper-toolchanger`-based calibration files are no longer bundled.
+`pin_watch.py` still contains optional compatibility synchronization for users
+who already use klipper-toolchanger, but that integration is disabled by
+default and is unrelated to MedusaHC-Calibrate.
 
-The macro uses T0 as the reference, probes every configured tool, saves the calculated Z offsets to `saved_vars.cfg`, and applies them again during printer initialization.
+### Optional klipper-toolchanger compatibility
 
-For accurate results, make sure every nozzle is clean before calibration.
-
----
-
-## Full X/Y/Z auto-calibration
-
-Full automatic calibration requires a contact calibration sensor supported by **klipper-toolchanger**. SexBall, Nudge, and similar sensors can be used. The sensor must allow the nozzle to be located in X, Y, and Z.
-
-MedusaHC integrates the **klipper-toolchanger** plugin by Viesturs Zariņš for this function:
-
-https://github.com/viesturz/klipper-toolchanger
-
-The plugin is installed using the command from its manual:
-
-```bash
-wget -O - https://raw.githubusercontent.com/viesturz/klipper-toolchanger/main/install.sh | bash
-```
-
-Configuration settings for klipper-toolchanger are located in `toolchanger.cfg`.
-
-The configuration is minimal:
-
-- a `[toolchanger]` block with everything disabled
-- one `[tool T0]`, `[tool T1]`, etc. block for each hotend
-
-MedusaHC continues to handle the actual tool changes. Klipper-toolchanger is used to track the active tool, run the calibration sensor routines, and expose the calibration results to the MedusaHC macros.
-
-To synchronize MHC state with it, you must set:
+Users who need another plugin that depends on klipper-toolchanger may install
+it separately and create a minimal configuration like this:
 
 ```ini
-sync_toolchanger: 1
+[toolchanger]
+initialize_on: manual
+verify_tool_pickup: False
+require_tool_present: False
+on_axis_not_homed: abort
+
+pickup_gcode:
+    T{tool.tool_number}
+
+[tool T0]
+tool_number: 0
+
+[tool T1]
+tool_number: 1
 ```
 
-in the `[pin_watch io]` script configuration.
-
-Calibration results are read directly from `printer.tools_calibrate.last_x_result`, `last_y_result`, and `last_z_result`. The stock `tools_calibrate.py` from klipper-toolchanger is used without modification, so klipper-toolchanger can be updated normally.
-
----
-
-## Auto-calibration settings
-
-The full X/Y/Z calibration settings are located in `calibrate-offsets.cfg`, in the `[tools_calibrate]` block.
-
-In `CALIBRATE_MOVE_OVER_PROBE`, specify an approximate position above the center of the installed calibration sensor. The position is configured with `variable_probe_x`, `variable_probe_y`, and `variable_probe_z`.
-
-The MHC version of `calibrate-offsets.cfg` is included in this project. It wraps the stock `TOOL_CALIBRATE_TOOL_OFFSET` command from klipper-toolchanger and pulls the result into the MHC `TOOL_OFFSET` variables and `saved_vars` automatically — no patching of klipper-toolchanger internals.
-
-For fully automatic calibration with saving and applying all offsets, run the macro:
-
-```gcode
-CALIBRATE_AND_SAVE_OFFSETS
-```
-
-If no SexBall, Nudge, or similar contact sensor is installed, do not use the full calibration procedure. Use native Eddy tap for Z and calibrate X/Y manually with printed tests or another suitable method.
+Add one `[tool Tn]` section for every configured MedusaHC tool, then set
+`sync_toolchanger: 1` in `[pin_watch io]`. MedusaHC continues to perform the
+physical tool changes; this option only mirrors the detected active tool into
+klipper-toolchanger. Keep it disabled when no other installed component needs
+that state.
 
 ---
 
