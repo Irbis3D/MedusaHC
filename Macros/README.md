@@ -35,4 +35,5 @@ Some active sections depend on software installed separately:
 - optional klipper-tmc-autotune;
 - standard installation-specific files such as `mainsail.cfg` and `timelapse.cfg`.
 
-`axiscope.cfg` is experimental. Its current macros have not been adapted to the V0.2 configuration structure and may not work without changes.
+Camera-assisted tool calibration is not currently included. A new native or
+adapted implementation may be added later.

@@ -29,22 +29,20 @@ Also, by buying parts using my links, you help as well.
 
 ## Software options
 
+> [!WARNING]
+> This branch preserves the frozen macro-based MedusaHC controller for existing
+> installations. It retains the legacy klipper-toolchanger calibration path,
+> but new development targets the Python controller on
+> [`main`](https://github.com/Irbis3D/MedusaHC). Migrating to `main` is strongly
+> recommended for future updates and optional modules.
+
 The standard MedusaHC configuration in this repository uses the macro-based
 tool-change controller.
 
-An experimental Python implementation is available separately in
-[MedusaHC-Python-Controller](https://github.com/Irbis3D/MedusaHC-Python-Controller).
-It keeps the familiar MedusaHC commands and configuration structure while
-moving pickup, parking, feeder, priming, cleaning and sensor verification into
-a Klipper Python module. This version performs tool changes faster by avoiding
-the chained macro execution and unnecessary fixed waits used by the original
-implementation.
-
-The Python controller is still experimental and is currently undergoing active
-testing. It should be installed only by users who are prepared to supervise
-tool changes, report problems and restore the macro version if necessary. Read
-its migration and rollback instructions and keep a complete printer backup
-before testing it.
+The Python controller is now the standard implementation in `main`. It keeps
+the familiar MedusaHC commands and configuration structure while moving
+pickup, parking, feeder, priming, cleaning, and sensor verification into a
+Klipper Python module. This branch receives compatibility fixes only.
 
 The optional [MedusaHC Control](https://github.com/Irbis3D/MedusaHC-Control/releases)
 panel is published in separate Macro and Python editions. Choose the edition
@@ -87,7 +85,8 @@ Discord server - https://discord.gg/ae44FHv786
 - Native Klipper Eddy tap replaces Eddy-ng for Z probing and Z-only tool calibration.
 - Full X/Y/Z calibration is handled through klipper-toolchanger with SexBall, Nudge, or a similar contact sensor.
 - Updated OrcaSlicer projects, a 4-tool printer preset, and post-processing scripts are included.
-- Experimental camera-assisted XY calibration files are retained as a reference but are not yet adapted to the V0.2 configuration.
+- Camera-assisted tool calibration is not currently supported. A new native or
+  adapted implementation may be developed later.
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete V0.2 release notes.
 
@@ -266,9 +265,12 @@ In my setup, **Adaptive** is disabled, so the line is always printed in the same
 
 KlipperScreen support is optional. A custom menu can be created for the main MedusaHC macros, but `KlipperScreen.conf` is not included in this V0.2 folder.
 
-### axiscope.cfg
+### Camera calibration
 
-This experimental file is kept as a reference for camera-assisted XY calibration. The concept should be usable, but the current macros have not yet been adapted to the V0.2 configuration structure and have not been verified with this release. They may not work without changes. I plan to test and update them when possible.
+Camera-assisted tool calibration is not currently supported. The previous
+experimental example was not compatible with this configuration and has been
+removed. A new native implementation or an integration with another project
+may be added later.
 
 ### macros.cfg
 
@@ -363,7 +365,7 @@ It is recommended to change heater-related parameters only if there are heating 
 This block defines the file where tool offsets are stored so they can be restored after a restart.
 (It is required when using auto-calibration.)
 
-#### [gcode_macro TOOL_CFG]
+#### [gcode_macro _TOOL_CFG]
 
 This macro contains the main coordinates and distances used in the system, as well as the speeds and accelerations for the tool change procedure.
 
@@ -400,16 +402,16 @@ The user only needs to select `variable_tools_direction` and enter the correct c
 - `variable_e_cur_high_mult` — multiplier applied to the extruder's base TMC `run_current` to get the boosted current used during feeder **OPEN**.
   The boost is needed so the motor has enough torque to break the mechanical lock without skipping steps. Typical range: **1.3 – 1.8**.
 
-#### [gcode_macro GLOBAL_STATE]
+#### [gcode_macro _GLOBAL_STATE]
 
 - `variable_max_tool: 4` — required by the macros to operate with the specified number of hotends.
 
 After this, there are parameters that are used internally by the macros.
 They should **not** be changed.
 
-#### [gcode_macro TOOL_STATE_0], [gcode_macro TOOL_STATE_1] and so on
+#### [gcode_macro _TOOL_STATE_0], [gcode_macro _TOOL_STATE_1] and so on
 
-Each hotend must have its own `TOOL_STATE` macro (`TOOL_STATE_0`, `TOOL_STATE_1`, and so on), where all parameters for that specific hotend are defined.
+Each hotend must have its own `TOOL_STATE` macro (`_TOOL_STATE_0`, `_TOOL_STATE_1`, and so on), where all parameters for that specific hotend are defined.
 
 - `variable_prime_amount` — the amount of filament (in mm) extruded during priming.
   A small value (**7–8 mm**) is suitable when printing with a draft/wipe tower.
@@ -464,7 +466,7 @@ It is responsible for:
 
 - assigning variables that depend on printer parameters
 - initial tool assignment
-- applying tool offset values from the `saved_vars` file to the variables in `[gcode_macro TOOL_OFFSET]`
+- applying tool offset values from the `saved_vars` file to the variables in `[gcode_macro _TOOL_OFFSET]`
 
 ---
 
@@ -545,7 +547,7 @@ The following sections are modified:
 
 ```gcode
 CLEAR_PAUSE
-PRIME_FLAGS_SET
+_PRIME_FLAGS_SET
 M104 T0 S150
 M190 S[bed_temperature_initial_layer_single]
 G28
@@ -576,7 +578,7 @@ T{next_extruder}
 - The **Layer change G-code** also includes a modification that assigns a layer variable. It is not used at the moment, but may be useful in the future.
 ```gcode
 ;AFTER_LAYER_CHANGE
-LAYER_SET L={layer_num}
+_LAYER_SET L={layer_num}
 ;[layer_z]
 ```
 
@@ -657,7 +659,7 @@ Place **one fewer copy** of this model than the number of hotends on the bed.
 Keep in mind that this test shows **tool offset**, so for MHC you need to **invert the sign** of the obtained values.
 
 The resulting offsets must be written into the corresponding variables in the
-`MHC_variables` file, inside the `TOOL_OFFSET` macro.
+`MHC_variables` file, inside the `_TOOL_OFFSET` macro.
 
 ---
 
@@ -722,7 +724,7 @@ The full X/Y/Z calibration settings are located in `calibrate-offsets.cfg`, in t
 
 In `CALIBRATE_MOVE_OVER_PROBE`, specify an approximate position above the center of the installed calibration sensor. The position is configured with `variable_probe_x`, `variable_probe_y`, and `variable_probe_z`.
 
-The MHC version of `calibrate-offsets.cfg` is included in this project. It wraps the stock `TOOL_CALIBRATE_TOOL_OFFSET` command from klipper-toolchanger and pulls the result into the MHC `TOOL_OFFSET` variables and `saved_vars` automatically — no patching of klipper-toolchanger internals.
+The MHC version of `calibrate-offsets.cfg` is included in this project. It wraps the stock `TOOL_CALIBRATE_TOOL_OFFSET` command from klipper-toolchanger and pulls the result into the MHC `_TOOL_OFFSET` variables and `saved_vars` automatically — no patching of klipper-toolchanger internals.
 
 For fully automatic calibration with saving and applying all offsets, run the macro:
 

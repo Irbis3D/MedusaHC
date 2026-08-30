@@ -2,7 +2,7 @@
 #
 # - Computes tool state from pin events (e, t0..tN) and exposes it as:
 #     printer["pin_watch <name>"].current_tool
-# - Does NOT write GLOBAL_STATE.
+# - Does NOT write _GLOBAL_STATE.
 # - Optional toolchanger sync:
 #     * While printing: only INITIALIZE_TOOLCHANGER when ct >= 0 (never UNSELECT)
 #     * While not printing: ct >= 0 -> INITIALIZE_TOOLCHANGER, else -> UNSELECT_TOOL
