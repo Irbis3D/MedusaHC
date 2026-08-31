@@ -305,6 +305,42 @@ This procedure still has some shortcomings. A visible defect may remain on the m
 
 ## MedusaHC configuration
 
+### Semi-manual Core installation
+
+The Core installer copies the Python controller and `pin_watch.py` into the
+detected Klipper extras directory and creates a separate example configuration
+under `~/printer_data/config/MedusaHC/`. It does not edit `printer.cfg`, restart
+Klipper, or overwrite an existing MedusaHC configuration directory.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Irbis3D/MedusaHC/main/install-online.sh | bash
+```
+
+The supplied example targets a four-tool V-Front Duender with a BTT Manta M8P
+V2.0. Its `MHC_config.cfg` contains a complete `[extruder]` definition, so
+review and remove conflicting sections from the existing printer configuration
+before manually adding:
+
+```ini
+[include MedusaHC/MHC_config.cfg]
+```
+
+Other actions use the same bootstrap command:
+
+```bash
+# Update Python scripts while preserving live configuration
+curl -fsSL https://raw.githubusercontent.com/Irbis3D/MedusaHC/main/install-online.sh | bash -s -- update
+
+# Show status
+curl -fsSL https://raw.githubusercontent.com/Irbis3D/MedusaHC/main/install-online.sh | bash -s -- status
+
+# Remove Python scripts but preserve configuration
+curl -fsSL https://raw.githubusercontent.com/Irbis3D/MedusaHC/main/install-online.sh | bash -s -- uninstall
+```
+
+Core configuration migration and automatic printer setup are intentionally not
+implemented yet.
+
 The main files responsible for MedusaHC operation are:
 
 - `MHC_config` — configuration of all hardware related to MHC
