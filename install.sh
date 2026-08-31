@@ -67,21 +67,7 @@ install_file() {
 
 write_entry_config() {
   local target="$1"
-  local temporary
-  temporary="$(mktemp "${TARGET_CONFIG_DIR}/.MHC_config.XXXXXX")"
-  {
-    printf '%s\n' \
-      '# MedusaHC example entry point.' \
-      '[include MHC_variables.cfg]' \
-      '[include MHC_macros.cfg]' \
-      ''
-    sed '/^\[include MedusaHC\//d' "${SCRIPT_DIR}/Macros/MHC_config.cfg"
-  } > "${temporary}"
-  chmod 0644 "${temporary}"
-  mv "${temporary}" "${target}"
-  if [[ "$(id -u)" == 0 ]]; then
-    chown "${INSTALL_USER}:$(id -gn "${INSTALL_USER}")" "${target}"
-  fi
+  install_file "${SCRIPT_DIR}/Macros/MHC_config.cfg" "${target}"
 }
 
 print_manual_steps() {

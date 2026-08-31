@@ -141,13 +141,14 @@ cp ~/MedusaHC-source/Macros/macros.cfg ~/printer_data/config/MedusaHC/macros_exa
 cp ~/MedusaHC-source/Macros/Line_Purge.cfg ~/printer_data/config/MedusaHC/Line_Purge_examples.cfg
 ```
 
-Add these include lines at the beginning of the copied
-`~/printer_data/config/MedusaHC/MHC_config.cfg`:
+The copied `MHC_config.cfg` already starts with the required relative includes:
 
 ```ini
 [include MHC_variables.cfg]
 [include MHC_macros.cfg]
 ```
+
+Do not add a second copy of them.
 
 Configure the files for the actual printer, resolve duplicate Klipper sections,
 and finally add `[include MedusaHC/MHC_config.cfg]` to `printer.cfg`.
