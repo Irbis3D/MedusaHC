@@ -8,6 +8,9 @@
 MedusaHC is an open-source toolchanger (hotend-changer) project.
 This is a beta version of the project. It is not finished yet, and there may be bugs during operation. The project will be updated gradually.
 
+> [!IMPORTANT]
+> **[Installation, update, removal, and manual setup instructions](INSTALLATION.md)**
+
 This project is licensed under GNU GPLv3.
 You're free to use, modify, and share it — just keep the copyright/license notices intact, provide the source code, release derivatives under GPLv3 too, and note what you changed.
 
@@ -46,9 +49,9 @@ branch. It retains the old klipper-toolchanger calibration workflow and is
 provided for compatibility and rollback, but new functionality is not planned
 for that branch. Migration to the Python controller is strongly recommended.
 
-The optional [MedusaHC Control](https://github.com/Irbis3D/MedusaHC-Control/releases)
-panel is published in separate Macro and Python editions. Choose the edition
-that matches the controller already installed on the printer.
+The optional [MedusaHC Control](https://github.com/Irbis3D/MedusaHC-Control)
+panel is installed independently. Its current transitional release supports
+the Python controller and the preserved legacy macro names.
 
 Optional features are kept in separate projects so they can be installed and
 updated independently:
@@ -307,13 +310,13 @@ This procedure still has some shortcomings. A visible defect may remain on the m
 
 ### Semi-manual Core installation
 
-The Core installer copies the Python controller and `pin_watch.py` into the
-detected Klipper extras directory and creates a separate example configuration
-under `~/printer_data/config/MedusaHC/`. It does not edit `printer.cfg`, restart
-Klipper, or overwrite an existing MedusaHC configuration directory.
+The Core installer copies the Python controller and `pin_watch.py`, then creates
+a separate editable example configuration under
+`~/printer_data/config/MedusaHC/`. It does not edit `printer.cfg`, restart
+Klipper, or overwrite an existing configuration directory.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Irbis3D/MedusaHC/main/install-online.sh | bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Irbis3D/MedusaHC/main/install-online.sh)"
 ```
 
 The supplied example targets a four-tool V-Front Duender with a BTT Manta M8P
@@ -325,21 +328,10 @@ before manually adding:
 [include MedusaHC/MHC_config.cfg]
 ```
 
-Other actions use the same bootstrap command:
-
-```bash
-# Update Python scripts while preserving live configuration
-curl -fsSL https://raw.githubusercontent.com/Irbis3D/MedusaHC/main/install-online.sh | bash -s -- update
-
-# Show status
-curl -fsSL https://raw.githubusercontent.com/Irbis3D/MedusaHC/main/install-online.sh | bash -s -- status
-
-# Remove Python scripts but preserve configuration
-curl -fsSL https://raw.githubusercontent.com/Irbis3D/MedusaHC/main/install-online.sh | bash -s -- uninstall
-```
-
-Core configuration migration and automatic printer setup are intentionally not
-implemented yet.
+See **[INSTALLATION.md](INSTALLATION.md)** for update, status, safe removal,
+complete removal, path overrides, exact installer behavior, and manual
+installation instructions. Core configuration migration and automatic printer
+setup are intentionally not implemented yet.
 
 The main files responsible for MedusaHC operation are:
 
