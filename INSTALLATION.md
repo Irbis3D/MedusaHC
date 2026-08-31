@@ -41,6 +41,10 @@ The installer:
 4. Places editable example configuration files in that directory.
 5. Prints the manual configuration steps that remain.
 
+The optional macro and purge examples are installed as `macros_examples.cfg`
+and `Line_Purge_examples.cfg`. These files are not included automatically and
+can be copied from selectively if needed.
+
 It does **not**:
 
 - edit `printer.cfg`;
@@ -132,17 +136,17 @@ git clone https://github.com/Irbis3D/MedusaHC.git ~/MedusaHC-source
 install -m 0644 ~/MedusaHC-source/Scripts/medusahc.py ~/klipper/klippy/extras/medusahc.py
 install -m 0644 ~/MedusaHC-source/Scripts/pin_watch.py ~/klipper/klippy/extras/pin_watch.py
 mkdir -p ~/printer_data/config/MedusaHC
-cp ~/MedusaHC-source/Macros/{MHC_config.cfg,MHC_variables.cfg,MHC_macros.cfg,macros.cfg,Line_Purge.cfg} ~/printer_data/config/MedusaHC/
+cp ~/MedusaHC-source/Macros/{MHC_config.cfg,MHC_variables.cfg,MHC_macros.cfg} ~/printer_data/config/MedusaHC/
+cp ~/MedusaHC-source/Macros/macros.cfg ~/printer_data/config/MedusaHC/macros_examples.cfg
+cp ~/MedusaHC-source/Macros/Line_Purge.cfg ~/printer_data/config/MedusaHC/Line_Purge_examples.cfg
 ```
 
 Add these include lines at the beginning of the copied
 `~/printer_data/config/MedusaHC/MHC_config.cfg`:
 
 ```ini
-[include MedusaHC/MHC_variables.cfg]
-[include MedusaHC/MHC_macros.cfg]
-[include MedusaHC/macros.cfg]
-[include MedusaHC/Line_Purge.cfg]
+[include MHC_variables.cfg]
+[include MHC_macros.cfg]
 ```
 
 Configure the files for the actual printer, resolve duplicate Klipper sections,

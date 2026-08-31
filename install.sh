@@ -50,7 +50,7 @@ TARGET_EXTRA_DIR="${KLIPPER_DIR}/klippy/extras"
 TARGET_CONTROLLER="${TARGET_EXTRA_DIR}/medusahc.py"
 TARGET_PIN_WATCH="${TARGET_EXTRA_DIR}/pin_watch.py"
 
-CONFIG_FILES=(MHC_config.cfg MHC_variables.cfg MHC_macros.cfg macros.cfg Line_Purge.cfg)
+CONFIG_FILES=(MHC_config.cfg MHC_variables.cfg MHC_macros.cfg)
 
 require_layout() {
   [[ -d "${TARGET_EXTRA_DIR}" ]] || die "Klipper extras not found: ${TARGET_EXTRA_DIR}"
@@ -72,10 +72,8 @@ write_entry_config() {
   {
     printf '%s\n' \
       '# MedusaHC example entry point.' \
-      '[include MedusaHC/MHC_variables.cfg]' \
-      '[include MedusaHC/MHC_macros.cfg]' \
-      '[include MedusaHC/macros.cfg]' \
-      '[include MedusaHC/Line_Purge.cfg]' \
+      '[include MHC_variables.cfg]' \
+      '[include MHC_macros.cfg]' \
       ''
     sed '/^\[include MedusaHC\//d' "${SCRIPT_DIR}/Macros/MHC_config.cfg"
   } > "${temporary}"
@@ -130,6 +128,8 @@ install_core() {
   for name in "${CONFIG_FILES[@]:1}"; do
     install_file "${SCRIPT_DIR}/Macros/${name}" "${TARGET_CONFIG_DIR}/${name}"
   done
+  install_file "${SCRIPT_DIR}/Macros/macros.cfg" "${TARGET_CONFIG_DIR}/macros_examples.cfg"
+  install_file "${SCRIPT_DIR}/Macros/Line_Purge.cfg" "${TARGET_CONFIG_DIR}/Line_Purge_examples.cfg"
   install_file "${SCRIPT_DIR}/Scripts/medusahc.py" "${TARGET_CONTROLLER}"
   install_file "${SCRIPT_DIR}/Scripts/pin_watch.py" "${TARGET_PIN_WATCH}"
   print_manual_steps
@@ -151,6 +151,8 @@ update_core() {
   for name in "${CONFIG_FILES[@]:1}"; do
     install_file "${SCRIPT_DIR}/Macros/${name}" "${examples}/${name}"
   done
+  install_file "${SCRIPT_DIR}/Macros/macros.cfg" "${examples}/macros_examples.cfg"
+  install_file "${SCRIPT_DIR}/Macros/Line_Purge.cfg" "${examples}/Line_Purge_examples.cfg"
   log "Python scripts updated. Live configuration was preserved."
   log "New reference configs: ${examples}"
   log "Klipper was not restarted."
