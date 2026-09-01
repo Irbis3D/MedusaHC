@@ -10,6 +10,8 @@ This is a beta version of the project. It is not finished yet, and there may be 
 
 > [!IMPORTANT]
 > **[Installation, update, removal, and manual setup instructions](INSTALLATION.md)**
+>
+> **If, for any reason, you are still using the macro-based version, it is available in the [legacy-macros branch](https://github.com/Irbis3D/MedusaHC/tree/legacy-macros). However, I strongly recommend migrating to the new Python-based version while the transition is still straightforward.**
 
 This project is licensed under GNU GPLv3.
 You're free to use, modify, and share it — just keep the copyright/license notices intact, provide the source code, release derivatives under GPLv3 too, and note what you changed.
