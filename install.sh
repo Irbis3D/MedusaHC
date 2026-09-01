@@ -50,7 +50,8 @@ TARGET_EXTRA_DIR="${KLIPPER_DIR}/klippy/extras"
 TARGET_CONTROLLER="${TARGET_EXTRA_DIR}/medusahc.py"
 TARGET_PIN_WATCH="${TARGET_EXTRA_DIR}/pin_watch.py"
 
-CONFIG_FILES=(MHC_config.cfg MHC_variables.cfg MHC_macros.cfg)
+SOURCE_CONFIG_DIR="${SCRIPT_DIR}/config/MedusaHC"
+SOURCE_EXTRA_DIR="${SCRIPT_DIR}/klippy/extras"
 
 require_layout() {
   [[ -d "${TARGET_EXTRA_DIR}" ]] || die "Klipper extras not found: ${TARGET_EXTRA_DIR}"
@@ -65,9 +66,13 @@ install_file() {
   fi
 }
 
-write_entry_config() {
-  local target="$1"
-  install_file "${SCRIPT_DIR}/Macros/MHC_config.cfg" "${target}"
+install_config_tree() {
+  local destination="$1" source name
+  for source in "${SOURCE_CONFIG_DIR}"/*.cfg; do
+    [[ -f "${source}" ]] || die "No configuration files found in ${SOURCE_CONFIG_DIR}."
+    name="$(basename -- "${source}")"
+    install_file "${source}" "${destination}/${name}"
+  done
 }
 
 print_manual_steps() {
@@ -101,8 +106,11 @@ EOF
 
 install_core() {
   require_layout
-  [[ -f "${SCRIPT_DIR}/Scripts/medusahc.py" ]] || die "medusahc.py is missing from the package."
-  [[ -f "${SCRIPT_DIR}/Scripts/pin_watch.py" ]] || die "pin_watch.py is missing from the package."
+  [[ -f "${SOURCE_EXTRA_DIR}/medusahc.py" ]] || die "medusahc.py is missing from the package."
+  [[ -f "${SOURCE_EXTRA_DIR}/pin_watch.py" ]] || die "pin_watch.py is missing from the package."
+  [[ -f "${SOURCE_CONFIG_DIR}/MHC_config.cfg" ]] || die "MHC_config.cfg is missing from the package."
+  [[ -f "${SOURCE_CONFIG_DIR}/MHC_variables.cfg" ]] || die "MHC_variables.cfg is missing from the package."
+  [[ -f "${SOURCE_CONFIG_DIR}/MHC_macros.cfg" ]] || die "MHC_macros.cfg is missing from the package."
   if [[ -e "${TARGET_CONFIG_DIR}" ]]; then
     die "${TARGET_CONFIG_DIR} already exists. Existing configuration was not changed. Use update or choose another MEDUSAHC_CONFIG_DIR."
   fi
@@ -110,35 +118,25 @@ install_core() {
   if [[ "$(id -u)" == 0 ]]; then
     chown "${INSTALL_USER}:$(id -gn "${INSTALL_USER}")" "${TARGET_CONFIG_DIR}"
   fi
-  write_entry_config "${TARGET_CONFIG_DIR}/MHC_config.cfg"
-  for name in "${CONFIG_FILES[@]:1}"; do
-    install_file "${SCRIPT_DIR}/Macros/${name}" "${TARGET_CONFIG_DIR}/${name}"
-  done
-  install_file "${SCRIPT_DIR}/Macros/macros.cfg" "${TARGET_CONFIG_DIR}/macros_examples.cfg"
-  install_file "${SCRIPT_DIR}/Macros/Line_Purge.cfg" "${TARGET_CONFIG_DIR}/Line_Purge_examples.cfg"
-  install_file "${SCRIPT_DIR}/Scripts/medusahc.py" "${TARGET_CONTROLLER}"
-  install_file "${SCRIPT_DIR}/Scripts/pin_watch.py" "${TARGET_PIN_WATCH}"
+  install_config_tree "${TARGET_CONFIG_DIR}"
+  install_file "${SOURCE_EXTRA_DIR}/medusahc.py" "${TARGET_CONTROLLER}"
+  install_file "${SOURCE_EXTRA_DIR}/pin_watch.py" "${TARGET_PIN_WATCH}"
   print_manual_steps
 }
 
 update_core() {
   require_layout
   [[ -d "${TARGET_CONFIG_DIR}" ]] || die "Core is not installed in ${TARGET_CONFIG_DIR}. Run install first."
-  [[ -f "${SCRIPT_DIR}/Scripts/medusahc.py" ]] || die "medusahc.py is missing from the package."
-  [[ -f "${SCRIPT_DIR}/Scripts/pin_watch.py" ]] || die "pin_watch.py is missing from the package."
-  install_file "${SCRIPT_DIR}/Scripts/medusahc.py" "${TARGET_CONTROLLER}"
-  install_file "${SCRIPT_DIR}/Scripts/pin_watch.py" "${TARGET_PIN_WATCH}"
+  [[ -f "${SOURCE_EXTRA_DIR}/medusahc.py" ]] || die "medusahc.py is missing from the package."
+  [[ -f "${SOURCE_EXTRA_DIR}/pin_watch.py" ]] || die "pin_watch.py is missing from the package."
+  install_file "${SOURCE_EXTRA_DIR}/medusahc.py" "${TARGET_CONTROLLER}"
+  install_file "${SOURCE_EXTRA_DIR}/pin_watch.py" "${TARGET_PIN_WATCH}"
   local examples="${TARGET_CONFIG_DIR}/upstream-examples"
   mkdir -p "${examples}"
   if [[ "$(id -u)" == 0 ]]; then
     chown "${INSTALL_USER}:$(id -gn "${INSTALL_USER}")" "${examples}"
   fi
-  write_entry_config "${examples}/MHC_config.cfg"
-  for name in "${CONFIG_FILES[@]:1}"; do
-    install_file "${SCRIPT_DIR}/Macros/${name}" "${examples}/${name}"
-  done
-  install_file "${SCRIPT_DIR}/Macros/macros.cfg" "${examples}/macros_examples.cfg"
-  install_file "${SCRIPT_DIR}/Macros/Line_Purge.cfg" "${examples}/Line_Purge_examples.cfg"
+  install_config_tree "${examples}"
   log "Python scripts updated. Live configuration was preserved."
   log "New reference configs: ${examples}"
   log "Klipper was not restarted."

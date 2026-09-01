@@ -133,15 +133,15 @@ Clone or download the repository, then copy the two Klipper modules:
 
 ```bash
 git clone https://github.com/Irbis3D/MedusaHC.git ~/MedusaHC-source
-install -m 0644 ~/MedusaHC-source/Scripts/medusahc.py ~/klipper/klippy/extras/medusahc.py
-install -m 0644 ~/MedusaHC-source/Scripts/pin_watch.py ~/klipper/klippy/extras/pin_watch.py
+install -m 0644 ~/MedusaHC-source/klippy/extras/medusahc.py ~/klipper/klippy/extras/medusahc.py
+install -m 0644 ~/MedusaHC-source/klippy/extras/pin_watch.py ~/klipper/klippy/extras/pin_watch.py
 mkdir -p ~/printer_data/config/MedusaHC
-cp ~/MedusaHC-source/Macros/{MHC_config.cfg,MHC_variables.cfg,MHC_macros.cfg} ~/printer_data/config/MedusaHC/
-cp ~/MedusaHC-source/Macros/macros.cfg ~/printer_data/config/MedusaHC/macros_examples.cfg
-cp ~/MedusaHC-source/Macros/Line_Purge.cfg ~/printer_data/config/MedusaHC/Line_Purge_examples.cfg
+cp -a ~/MedusaHC-source/config/MedusaHC/. ~/printer_data/config/MedusaHC/
 ```
 
-The copied `MHC_config.cfg` already starts with the required relative includes:
+This is the same source layout and the same file copy performed by the
+automatic installer. The copied `MHC_config.cfg` already starts with the
+required relative includes:
 
 ```ini
 [include MHC_variables.cfg]

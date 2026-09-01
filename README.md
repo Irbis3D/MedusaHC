@@ -274,7 +274,7 @@ The exact coordinates depend on the printer. Check the homing sequence and every
 
 The supplied Duender 4-tool configuration uses front docks and rear parking.
 
-### line_purge.cfg
+### Line_Purge_examples.cfg
 
 Modified so that the purge line is printed not along the X axis, but on the left side of the bed along the Y axis.
 
@@ -292,7 +292,7 @@ experimental example was not compatible with the current configuration and
 has been removed. A new native implementation or an integration with another
 project may be added later.
 
-### macros.cfg
+### macros_examples.cfg
 
 The `START_PRINT`, `END_PRINT`, `PAUSE`, and `RESUME` macros were heavily modified.
 
@@ -546,7 +546,7 @@ I also added this procedure to the slicer start G-code, so this issue should def
 ### Python tool-change controller
 
 The physical pickup, drop, feeder, cleaning, priming, offset, and verification
-logic is implemented by `Scripts/medusahc.py`. The short public macros retain
+logic is implemented by `klippy/extras/medusahc.py`. The short public macros retain
 the familiar Mainsail and slicer interface without exposing internal helper
 commands.
 

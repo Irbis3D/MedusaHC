@@ -1,20 +1,26 @@
-# Configuration files
+# Supplementary printer configuration examples
 
-This folder contains the Klipper configuration example and the macros used by MedusaHC V0.2.
+This folder contains supplementary Duender printer examples such as
+`printer.cfg`, Eddy/BLTouch configuration, sensorless homing, ADXL, and an
+example saved-variables file. These files are not installed automatically.
+
+The canonical MedusaHC Core configuration installed into
+`~/printer_data/config/MedusaHC/` is stored in `config/MedusaHC/` at the
+repository root.
 
 The supplied configuration is a **4-tool V-Front Duender example**. It is not a universal drop-in printer configuration. Before use, check all MCU identifiers, pins, axis limits, homing directions, TMC settings, PID values, probe offsets, dock coordinates, and parking positions.
 
-The main MedusaHC files are:
+The main MedusaHC files in the repository's `config/MedusaHC/` directory are:
 
 - `MHC_config.cfg` — tool sensors, shared extruder hardware, heaters, fans, servo, and tool commands.
 - `MHC_variables.cfg` — tool count, layout orientation, dock coordinates, cleaning/priming settings, and stored offsets.
 - `MHC_macros.cfg` — the public macro interface and small compatibility wrappers for the Python controller.
-- `medusahc.py` from the `Scripts` folder — pickup, drop, feeder, cleaning, priming, error handling, and offset logic.
-- `pin_watch.py` from the `Scripts` folder — real-time tool sensor monitoring.
+- `medusahc.py` from `klippy/extras/` — pickup, drop, feeder, cleaning, priming, error handling, and offset logic.
+- `pin_watch.py` from `klippy/extras/` — real-time tool sensor monitoring.
 
 ## Layout selection
 
-Set `variable_tools_direction` in `MHC_variables.cfg`:
+Set `variable_tools_direction` in `config/MedusaHC/MHC_variables.cfg`:
 
 - `1` — V-Front;
 - `-1` — V-Back.
@@ -33,7 +39,7 @@ SexBall/contact, Eddy Tap Z, or Eddy Tap + EddySeek XYZ calibration is needed.
 
 ## External components
 
-Some active sections depend on software installed separately:
+Some example sections depend on software installed separately:
 
 - `pin_watch.py`, which must be copied to the Klipper `klippy/extras` directory;
 - `medusahc.py`, which must be copied to the same Klipper `klippy/extras` directory;
