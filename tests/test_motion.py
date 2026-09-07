@@ -29,7 +29,7 @@ class MotionTests(unittest.TestCase):
                     with self.subTest(direction=direction, brush=brush, manual=manual):
                         controller = self.controller()
                         values = dict(x=17, x_prime_shift=12, y_prime=-45, y_brush=brush,
-                                      y_safe=-5, feed=18000, clean_feed=3000, direction=direction, accel=10000)
+                                      y_safe=-5, feed=18000, direction=direction, accel=10000)
                         controller._motion_values = lambda tool: values
                         scripts = []
                         controller._run = scripts.append
@@ -57,10 +57,32 @@ class MotionTests(unittest.TestCase):
                                     crossings.append((before, fields["F"]))
                         self.assertEqual(len(crossings), 3)
                         self.assertEqual(crossings[0][0]["Y"], brush - 2 * direction)
-                        self.assertTrue(all(speed == 3000 for _, speed in crossings))
+                        self.assertTrue(all(speed == 15000 for _, speed in crossings))
                         self.assertEqual(position["Y"], -5)
                         if manual:
                             self.assertEqual(primes, [])
                         else:
                             self.assertEqual(len(primes), 3)
                             self.assertTrue(all(point == {"X": 17-12*direction, "Y": -45} for point in primes))
+
+    def test_each_tool_uses_its_own_speed_and_reads_runtime_changes(self):
+        controller = self.controller()
+        states = {0: {"clean_move_speed": 80}, 1: {"clean_move_speed": 250}}
+        controller._macro = lambda name: states[int(name.rsplit("_", 1)[1])]
+        values = dict(x=17, x_prime_shift=12, y_prime=-45, y_brush=-45,
+                      y_safe=-5, feed=18000, direction=1, accel=10000)
+        controller._motion_values = lambda tool: values
+        for tool, speed in ((0, 80), (1, 250), (0, 120)):
+            states[tool]["clean_move_speed"] = speed
+            controller._current_tool = lambda: tool
+            for manual in (True, False):
+                scripts = []
+                controller._run = scripts.append
+                if manual:
+                    controller.cmd_MHC_CLEAN(None)
+                else:
+                    controller._after_pick(tool, values)
+                crossings = [line for line in "\n".join(scripts).splitlines()
+                             if line.startswith("G1 X") and " Y" in line]
+                self.assertEqual(len(crossings), 3)
+                self.assertTrue(all(float(line.split(" F")[1]) == speed * 60 for line in crossings))

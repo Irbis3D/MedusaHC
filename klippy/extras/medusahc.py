@@ -103,7 +103,6 @@ class MedusaHC:
             for name, multiplier in (
                 ("fast_feedrate", float(cfg["fast_speed"]) * 60.0),
                 ("slow_feedrate", float(cfg.get("slow_speed", 40.0)) * 60.0),
-                ("clean_feedrate", float(cfg.get("clean_speed", 50.0)) * 60.0),
             ):
                 self._set_compat(name, multiplier)
             tmc = self.printer.lookup_object("tmc2209 extruder", None)
@@ -288,7 +287,6 @@ class MedusaHC:
             "accel": float(cfg["fast_accel"]),
             "feed": float(cfg["fast_speed"]) * 60.0,
             "slow_feed": float(cfg.get("slow_speed", 40.0)) * 60.0,
-            "clean_feed": float(cfg.get("clean_speed", 50.0)) * 60.0,
             "direction": direction,
         }
 
@@ -490,7 +488,7 @@ G90""".format(
         if self._is_printing() and int(state.get("clean_move", 1)) != 0:
             cmx = float(state.get("x_clean_move", 0.0))
             cmy = float(state.get("y_clean_move", 0.0))
-            cmf = v["clean_feed"]
+            cmf = float(state.get("clean_move_speed", 250.0)) * 60.0
             # On a tool's first use the slicer has no matching tool-change
             # unretract queued. Use dedicated short retracts after both prime
             # and cleaning; later changes retain the normal retract values.
@@ -594,7 +592,7 @@ G1 Y{safe} F{feed}""".format(
         old_accel = self._old_accel()
         cmx = float(state.get("x_clean_move", 0.0))
         cmy = float(state.get("y_clean_move", 0.0))
-        cmf = v["clean_feed"]
+        cmf = float(state.get("clean_move_speed", 250.0)) * 60.0
         ptfe = float(state.get("ptfe_clean_slow_speed", 12.5)) * 60.0
         d = v["direction"]
         self._run("""SET_VELOCITY_LIMIT ACCEL={accel}

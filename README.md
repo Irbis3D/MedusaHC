@@ -480,7 +480,7 @@ Each hotend must have its own `TOOL_STATE` macro (`_TOOL_STATE_0`, `_TOOL_STATE_
 
 - `variable_y_clean_move`
 
-- `variable_clean_move_speed` — retained for older macro configurations. Python Core uses `variable_clean_speed` for the crossing strokes over the brush.
+- `variable_clean_move_speed` — brush crossing speed in mm/s for this tool, used both by CLEAN and by cleaning after pickup. Read from `_TOOL_STATE_n` on each operation; changes apply to the next cleaning cycle.
 
 Pickup moves to `y_prime` before extrusion. Cleaning then shifts to the brush
 path relative to `y_brush`; the crossing starts 2 mm toward the dock from this
