@@ -45,13 +45,23 @@ The optional macro and purge examples are installed as `macros_examples.cfg`
 and `Line_Purge_examples.cfg`. These files are not included automatically and
 can be copied from selectively if needed.
 
+Core requires a `_HOME_REQUEST` (or `HOME_REQUEST`) macro. If your configuration
+does not define one, copy `_HOME_REQUEST` from `macros_examples.cfg` into an
+included configuration file and adapt its homing checks to your printer.
+Do not include all the examples just to obtain this helper: they also define
+print start, end and pause macros which may conflict with your own.
+
 It does **not**:
 
 - edit `printer.cfg`;
 - restart Klipper or any other service;
 - modify Moonraker;
-- overwrite an existing `MedusaHC` configuration directory;
+- overwrite live files in an existing `MedusaHC` configuration directory;
 - migrate settings from an older installation.
+
+Reinstalling with a retained `MHC_config.cfg` and `MHC_variables.cfg` restores
+the Python modules and places new examples in `upstream-examples`, just like
+update. An unrelated or incomplete existing directory is rejected.
 
 The supplied configuration is an example for a four-tool V-Front Duender with
 a BTT Manta M8P V2.0. It is not a universal ready-to-run printer configuration.

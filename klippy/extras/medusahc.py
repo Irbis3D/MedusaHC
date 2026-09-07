@@ -457,6 +457,9 @@ M106 S255""".format(
         state = self._macro("TOOL_STATE_%d" % tool)
         first_prime_executed = False
         if self._is_printing() and self._heater_temperature(tool) > 190.0:
+            self._run("G90\nG1 X%s F%s\nG1 Y%s F%s" % (
+                v["x"] - v["x_prime_shift"] * v["direction"], v["feed"],
+                v["y_prime"], v["feed"]))
             first_prime_enabled = int(state.get("first_prime_enabled", 1)) != 0
             if first_prime_enabled and int(state.get("first_prime_flag", 1)) == 0:
                 amount = float(state.get("first_prime_amount", 0.0))
@@ -487,7 +490,7 @@ G90""".format(
         if self._is_printing() and int(state.get("clean_move", 1)) != 0:
             cmx = float(state.get("x_clean_move", 0.0))
             cmy = float(state.get("y_clean_move", 0.0))
-            cmf = float(state.get("clean_move_speed", 1.0)) * 60.0
+            cmf = v["clean_feed"]
             # On a tool's first use the slicer has no matching tool-change
             # unretract queued. Use dedicated short retracts after both prime
             # and cleaning; later changes retain the normal retract values.
@@ -517,7 +520,8 @@ G90
 G1 Y{safe} F{feed}""".format(
                 xprime=v["x"]-v["x_prime_shift"]*d, prime=v["y_prime"], feed=v["feed"],
                 xptfe=10*d, ptfe=ptfe, yptfe=6*d, xptfe_back=-10*d, xbrush=10*d,
-                ybrush=-8*d, cmx1=-cmx*d, cmy1=cmy*d, cmy2=-cmy*d, cmx2=cmx*d,
+                ybrush=v["y_brush"]-v["y_prime"]-8*d,
+                cmx1=-cmx*d, cmy1=cmy*d, cmy2=-cmy*d, cmx2=cmx*d,
                 cmf=cmf, retract=retract, rf=rf, safe=v["y_safe"]
             ))
             self._apply_offset(tool)
@@ -590,7 +594,7 @@ G1 Y{safe} F{feed}""".format(
         old_accel = self._old_accel()
         cmx = float(state.get("x_clean_move", 0.0))
         cmy = float(state.get("y_clean_move", 0.0))
-        cmf = float(state.get("clean_move_speed", 1.0)) * 60.0
+        cmf = v["clean_feed"]
         ptfe = float(state.get("ptfe_clean_slow_speed", 12.5)) * 60.0
         d = v["direction"]
         self._run("""SET_VELOCITY_LIMIT ACCEL={accel}
@@ -616,7 +620,8 @@ SET_VELOCITY_LIMIT ACCEL={old}""".format(
             accel=v["accel"], safe=v["y_safe"], feed=v["feed"],
             xprime=v["x"] - v["x_prime_shift"]*d, prime=v["y_prime"],
             xptfe=10*d, ptfe=ptfe, yptfe=6*d, xptfe_back=-10*d,
-            xbrush=10*d, ybrush=-8*d, cmx1=-cmx*d, cmy1=cmy*d,
+            xbrush=10*d, ybrush=v["y_brush"]-v["y_prime"]-8*d,
+            cmx1=-cmx*d, cmy1=cmy*d,
             cmy2=-cmy*d, cmx2=cmx*d, cmf=cmf, old=old_accel
         ))
 

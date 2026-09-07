@@ -100,6 +100,10 @@ cleaning/priming position. Remove or comment conflicting sections yourself.
 Only after that, add this line to printer.cfg manually:
   [include MedusaHC/MHC_config.cfg]
 
+Provide _HOME_REQUEST (or HOME_REQUEST) in an included config. A helper is
+provided in macros_examples.cfg; copy it selectively and review its homing
+checks. The example file is not automatically included.
+
 The installer did not modify printer.cfg and did not restart Klipper.
 EOF
 }
@@ -112,6 +116,11 @@ install_core() {
   [[ -f "${SOURCE_CONFIG_DIR}/MHC_variables.cfg" ]] || die "MHC_variables.cfg is missing from the package."
   [[ -f "${SOURCE_CONFIG_DIR}/MHC_macros.cfg" ]] || die "MHC_macros.cfg is missing from the package."
   if [[ -e "${TARGET_CONFIG_DIR}" ]]; then
+    if [[ -f "${TARGET_CONFIG_DIR}/MHC_config.cfg" && -f "${TARGET_CONFIG_DIR}/MHC_variables.cfg" ]]; then
+      update_core
+      print_manual_steps
+      return
+    fi
     die "${TARGET_CONFIG_DIR} already exists. Existing configuration was not changed. Use update or choose another MEDUSAHC_CONFIG_DIR."
   fi
   mkdir -p "${TARGET_CONFIG_DIR}"
@@ -147,7 +156,7 @@ uninstall_core() {
   if [[ -f "${TARGET_EXTRA_DIR}/medusahc_calibrate.py" ]]; then
     die "MedusaHC-Calibrate is still installed. Remove it before removing Core."
   fi
-  if [[ -f /var/lib/medusahc-control/config.json ]]; then
+  if [[ -f /etc/systemd/system/medusahc-control.service || -f "${INSTALL_HOME}/medusahc-control/medusahc_control/__main__.py" || -f /opt/medusahc-control/medusahc_control/__main__.py ]]; then
     die "MedusaHC Control is still installed. Remove it before removing Core."
   fi
   rm -f -- "${TARGET_CONTROLLER}" "${TARGET_PIN_WATCH}"

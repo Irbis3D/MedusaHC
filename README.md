@@ -452,6 +452,8 @@ The user only needs to select `variable_tools_direction` and enter the correct c
 
 - `variable_e_cur_high_mult` — multiplier applied to the extruder's base TMC `run_current` to get the boosted current used during feeder **OPEN**.
   The boost is needed so the motor has enough torque to break the mechanical lock without skipping steps. Typical range: **1.3 – 1.8**.
+  Base and boosted currents are cached at initialization. Save changes to the
+  multiplier or `run_current` in the configuration and restart Klipper while idle.
 
 #### [gcode_macro _GLOBAL_STATE]
 
@@ -478,8 +480,12 @@ Each hotend must have its own `TOOL_STATE` macro (`_TOOL_STATE_0`, `_TOOL_STATE_
 
 - `variable_y_clean_move`
 
-- `variable_clean_move_speed` — during cleaning, the hotend moves to the center of the brush and then performs a movement away from it using the parameters defined here.
-  Distances: a **positive** value moves in the positive direction, a **negative** value moves in the negative direction.
+- `variable_clean_move_speed` — retained for older macro configurations. Python Core uses `variable_clean_speed` for the crossing strokes over the brush.
+
+Pickup moves to `y_prime` before extrusion. Cleaning then shifts to the brush
+path relative to `y_brush`; the crossing starts 2 mm toward the dock from this
+reference, preserving the original mirrored geometry. Both Y values default
+to -45 mm. The PTFE passes retain `ptfe_clean_slow_speed`.
 
 - `variable_clean_retract`
 
@@ -510,9 +516,10 @@ Below is a short overview, just to understand the main algorithms.
 
 ---
 
-### [delayed_gcode INIT_SENSOR_STATE]
+### Python initialization
 
-This is a special G-code that runs on startup.
+The Python controller initializes after Klipper becomes ready; there is no
+`INIT_SENSOR_STATE` macro on `main`.
 It is responsible for:
 
 - assigning variables that depend on printer parameters
@@ -525,23 +532,15 @@ It is responsible for:
 
 These macros control the feeder.
 
-Running **two OPEN commands in a row is not allowed**, as this can cause the mechanism to jam.
+The Python controller ignores OPEN when its stored feeder state is already open.
 
 There are no dedicated sensors to track the feeder state, so the state is stored in a variable. The printer uses this variable to determine whether the feeder is open or closed.
 
 Since closing the feeder is relatively safe, it is forced on printer startup. From that moment on, the printer knows the feeder state and will not try to open it incorrectly.
 
-#### Known issue
-
-There is a known bug that I have not solved yet, related to opening the feeder.
-
-If the printer received a motor disable command (`M84`) or if the motors were disabled by timeout, then on the **first feeder OPEN after that**, the extruder motor does not activate for some reason.
-
-If the printer has been idle for a long time, or if you manually disabled the motors, then **before the next tool changes** you must execute the `OPEN` macro and then the `CLOSE` macro once.
-
-After that, all further OPEN operations will work correctly.
-
-I also added this procedure to the slicer start G-code, so this issue should definitely not occur during printing.
+The old macro controller documented an OPEN/CLOSE workaround after motor
+disable. That is not part of the current slicer start sequence, which calls
+CLOSE. The Python controller tracks feeder state internally.
 
 ---
 
@@ -684,8 +683,12 @@ As a result, **tool offset has the opposite sign of the G-code offset**.
 
 ### Manual tool offset calibration
 
-In the `MHC_macros` file, inside the `INIT_SENSOR_STATE` macro, you need to comment out
-(add `#` at the beginning of each line) the entire **“Initial tool offset setup”** block.
+Saved offsets override the initial `_TOOL_OFFSET` values in `MHC_variables.cfg`
+at startup. Do not disable initialization for manual calibration. Save your
+measured G-code offsets with `SAVE_VARIABLE`, using keys such as
+`t1_gcode_x_offset`, `t1_gcode_y_offset`, and `t1_gcode_z_offset`.
+For example: `SAVE_VARIABLE VARIABLE=t1_gcode_x_offset VALUE=0.12`.
+Restart Klipper while idle to load these values into `_TOOL_OFFSET`.
 
 ---
 
@@ -711,8 +714,8 @@ Place **one fewer copy** of this model than the number of hotends on the bed.
 
 Keep in mind that this test shows **tool offset**, so for MHC you need to **invert the sign** of the obtained values.
 
-The resulting offsets must be written into the corresponding variables in the
-`MHC_variables` file, inside the `_TOOL_OFFSET` macro.
+Save the resulting offsets as described above. The corresponding variables
+in `_TOOL_OFFSET` are startup defaults only when no saved value exists.
 
 ---
 
