@@ -499,8 +499,8 @@ G90""".format(
             d = v["direction"]
             ptfe = float(state.get("ptfe_clean_slow_speed", 12.5)) * 60.0
             self._run("""G90
+G1 Y{brush} F{feed}
 G1 X{xprime} F{feed}
-G1 Y{prime} F{feed}
 G91
 G1 X{xptfe} F{ptfe}
 G1 Y{yptfe} F{feed}
@@ -516,9 +516,9 @@ G1 X{cmx1} Y{cmy1} F{cmf}
 G1 E-{retract} F{rf}
 G90
 G1 Y{safe} F{feed}""".format(
-                xprime=v["x"]-v["x_prime_shift"]*d, prime=v["y_prime"], feed=v["feed"],
+                xprime=v["x"]-v["x_prime_shift"]*d, brush=v["y_brush"], feed=v["feed"],
                 xptfe=10*d, ptfe=ptfe, yptfe=6*d, xptfe_back=-10*d, xbrush=10*d,
-                ybrush=v["y_brush"]-v["y_prime"]-8*d,
+                ybrush=-8*d,
                 cmx1=-cmx*d, cmy1=cmy*d, cmy2=-cmy*d, cmx2=cmx*d,
                 cmf=cmf, retract=retract, rf=rf, safe=v["y_safe"]
             ))
@@ -599,7 +599,7 @@ G1 Y{safe} F{feed}""".format(
 G90
 G1 Y{safe} F{feed}
 G1 X{xprime} F{feed}
-G1 Y{prime} F{feed}
+G1 Y{brush} F{feed}
 G91
 G1 X{xptfe} F{ptfe}
 G1 Y{yptfe} F{feed}
@@ -616,9 +616,9 @@ G90
 G1 Y{safe} F{feed}
 SET_VELOCITY_LIMIT ACCEL={old}""".format(
             accel=v["accel"], safe=v["y_safe"], feed=v["feed"],
-            xprime=v["x"] - v["x_prime_shift"]*d, prime=v["y_prime"],
+            xprime=v["x"] - v["x_prime_shift"]*d, brush=v["y_brush"],
             xptfe=10*d, ptfe=ptfe, yptfe=6*d, xptfe_back=-10*d,
-            xbrush=10*d, ybrush=v["y_brush"]-v["y_prime"]-8*d,
+            xbrush=10*d, ybrush=-8*d,
             cmx1=-cmx*d, cmy1=cmy*d,
             cmy2=-cmy*d, cmx2=cmx*d, cmf=cmf, old=old_accel
         ))

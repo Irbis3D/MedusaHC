@@ -482,8 +482,10 @@ Each hotend must have its own `TOOL_STATE` macro (`_TOOL_STATE_0`, `_TOOL_STATE_
 
 - `variable_clean_move_speed` — brush crossing speed in mm/s for this tool, used both by CLEAN and by cleaning after pickup. Read from `_TOOL_STATE_n` on each operation; changes apply to the next cleaning cycle.
 
-Pickup moves to `y_prime` before extrusion. Cleaning then shifts to the brush
-path relative to `y_brush`; the crossing starts 2 mm toward the dock from this
+Pickup moves to `y_prime` at the X position set by `x_prime_shift` before
+extrusion. All priming and the prime retract finish there. The next move is
+to `y_brush`, before any cleaning X stroke. The entire slow/fast PTFE path
+then runs relative to `y_brush`; the crossing starts 2 mm toward the dock from this
 reference, preserving the original mirrored geometry. Both Y values default
 to -45 mm. The PTFE passes retain `ptfe_clean_slow_speed`.
 

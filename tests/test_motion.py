@@ -13,7 +13,8 @@ class MotionTests(unittest.TestCase):
         controller = object.__new__(module.MedusaHC)
         controller._macro = Mock(return_value={"prime_amount": 10, "prime_speed": 5,
                                               "x_clean_move": 8, "y_clean_move": 5,
-                                              "clean_move_speed": 250})
+                                              "clean_move_speed": 250,
+                                              "prime_retract": .8, "clean_retract": .7})
         controller._is_printing = lambda: True
         controller._heater_temperature = lambda tool: 210
         controller._apply_offset = Mock()
@@ -39,7 +40,7 @@ class MotionTests(unittest.TestCase):
                             controller._after_pick(0, values)
                         absolute = True
                         position = dict(X=0., Y=0.)
-                        primes, crossings = [], []
+                        primes, crossings, moves, slow_passes = [], [], [], []
                         for line in "\n".join(scripts).splitlines():
                             if line == "G90":
                                 absolute = True
@@ -48,6 +49,7 @@ class MotionTests(unittest.TestCase):
                             elif line.startswith("G1 "):
                                 fields = {token[0]: float(token[1:]) for token in line.split()[1:]}
                                 before = position.copy()
+                                moves.append((before, fields))
                                 for axis in position:
                                     if axis in fields:
                                         position[axis] = fields[axis] if absolute else position[axis] + fields[axis]
@@ -55,15 +57,23 @@ class MotionTests(unittest.TestCase):
                                     primes.append(position.copy())
                                 if "X" in fields and "Y" in fields:
                                     crossings.append((before, fields["F"]))
+                                if "X" in fields and fields.get("F") == 750:
+                                    slow_passes.append(before)
                         self.assertEqual(len(crossings), 3)
                         self.assertEqual(crossings[0][0]["Y"], brush - 2 * direction)
                         self.assertTrue(all(speed == 15000 for _, speed in crossings))
                         self.assertEqual(position["Y"], -5)
+                        self.assertEqual(slow_passes[0], {"X": 17-12*direction, "Y": brush})
+                        self.assertEqual(slow_passes[1]["Y"], brush + 6*direction)
                         if manual:
                             self.assertEqual(primes, [])
                         else:
                             self.assertEqual(len(primes), 3)
                             self.assertTrue(all(point == {"X": 17-12*direction, "Y": -45} for point in primes))
+                            prime_retract = next(i for i, (_, fields) in enumerate(moves) if fields.get("E") == -.8)
+                            self.assertEqual(moves[prime_retract + 1][1], {"Y": brush, "F": 18000})
+                            self.assertEqual(moves[-2][1]["E"], -.7)
+                            self.assertEqual(moves[-1][1], {"Y": -5, "F": 18000})
 
     def test_each_tool_uses_its_own_speed_and_reads_runtime_changes(self):
         controller = self.controller()
