@@ -12,7 +12,7 @@ Code map for maintainers
 * Sensor helpers read the existing ``pin_watch io`` Klipper object.
 * Feeder and offset helpers contain the small reusable physical operations.
 * ``_drop_active`` and ``_pick`` contain the dock motion paths.
-* ``_after_pick`` contains printing-only prime and brush-cleaning behavior.
+* ``_after_pick`` contains print and recovery prime/brush-cleaning behavior.
 * ``cmd_MHC_*`` methods are the public Klipper G-code command handlers.
 
 Normal tuning should be done in ``MHC_variables.cfg``. Edit motion formulas in
@@ -22,6 +22,7 @@ Klipper feedrates in mm/min; user-facing speed variables are in mm/s and are
 multiplied by 60 where needed.
 """
 
+import copy
 import logging
 
 
@@ -47,6 +48,9 @@ class MedusaHC:
         self.operation = "idle"
         self.target_tool = -1
         self.last_error = ""
+        self.sensor_error = False
+        self._resume_preparing = False
+        self._change_state = None
         self.feeder_open = False
         self.layer = 0
         self.printer.register_event_handler("klippy:ready", self._handle_ready)
@@ -62,6 +66,7 @@ class MedusaHC:
             "MHC_CLOSE": (self.cmd_MHC_CLOSE, "Close the MedusaHC feeder"),
             "MHC_CLEAN": (self.cmd_MHC_CLEAN, "Clean the active MedusaHC tool"),
             "MHC_ERROR": (self.cmd_MHC_ERROR, "Run MedusaHC error recovery"),
+            "MHC_RESUME": (self.cmd_MHC_RESUME, "Prepare the target tool and resume"),
             "MHC_TOOL_OFFSET": (self.cmd_MHC_TOOL_OFFSET, "Apply a tool offset"),
             "MHC_ASSIGN_TOOL": (self.cmd_MHC_ASSIGN_TOOL, "Sync klipper-toolchanger"),
             "MHC_LAYER_SET": (self.cmd_MHC_LAYER_SET, "Update the current layer"),
@@ -153,7 +158,7 @@ class MedusaHC:
             "last_error": self.last_error,
             "feeder_open": self.feeder_open,
             "layer": self.layer,
-            "sensor_error": self._current_tool() == -2,
+            "sensor_error": self.sensor_error,
             "tool_count": self._tool_count(),
             "sensors": sensors,
         }
@@ -233,6 +238,15 @@ class MedusaHC:
                 return True
         return self._current_tool() == expected
 
+    def _remember_print_position(self):
+        """Capture the print's G-code state before dock moves can change it."""
+        if not self._is_printing() or self._resume_preparing:
+            return
+        self._run("SAVE_GCODE_STATE NAME=MHC_CHANGE_STATE")
+        self._change_state = copy.deepcopy(
+            self.printer.lookup_object("gcode_move").saved_states[
+                "MHC_CHANGE_STATE"])
+
     def _begin(self, operation, target=-1):
         if self.operation != "idle":
             raise self.printer.command_error(
@@ -241,11 +255,14 @@ class MedusaHC:
         self.operation = operation
         self.target_tool = target
         self.last_error = ""
+        self.sensor_error = False
 
     def _finish(self):
         self.operation = "idle"
 
     def _fail(self, message):
+        # Latch operation failures; raw sensor transitions are not errors.
+        self.sensor_error = True
         self.last_error = message
         logging.error("MedusaHC: %s", message)
         stats = self.printer.lookup_object("print_stats", None)
@@ -253,6 +270,12 @@ class MedusaHC:
         try:
             self._run("MHC_ERROR")
         finally:
+            if self._change_state is not None:
+                # BASE_PAUSE captures a position during the failed change.
+                # Preserve the prechange G-code/E/layer context; recovery
+                # later replaces its XYZ with the safe exit position.
+                self.printer.lookup_object("gcode_move").saved_states[
+                    "PAUSE_STATE"] = copy.deepcopy(self._change_state)
             self._finish()
         if print_was_active:
             raise _OperationPaused(message)
@@ -454,7 +477,8 @@ M106 S255""".format(
         """
         state = self._macro("TOOL_STATE_%d" % tool)
         first_prime_executed = False
-        if self._is_printing() and self._heater_temperature(tool) > 190.0:
+        preparing = self._is_printing() or self._resume_preparing
+        if preparing and self._heater_temperature(tool) > 190.0:
             self._run("G90\nG1 X%s F%s\nG1 Y%s F%s" % (
                 v["x"] - v["x_prime_shift"] * v["direction"], v["feed"],
                 v["y_prime"], v["feed"]))
@@ -485,7 +509,7 @@ G90""".format(
                 f1=speed * .5 * 60., f2=speed * .75 * 60., f3=speed * 60.,
                 retract=retract, rf=retract_speed * 60.
             ))
-        if self._is_printing() and int(state.get("clean_move", 1)) != 0:
+        if preparing and int(state.get("clean_move", 1)) != 0:
             cmx = float(state.get("x_clean_move", 0.0))
             cmy = float(state.get("y_clean_move", 0.0))
             cmf = float(state.get("clean_move_speed", 250.0)) * 60.0
@@ -537,18 +561,37 @@ G1 Y{safe} F{feed}""".format(
         if tool is None:
             raise gcmd.error("MHC_SET requires T=<number>")
         self._validate_tool(gcmd, tool)
+        try:
+            self._set_tool(tool)
+        except _OperationPaused as exc:
+            self.gcode.respond_info("MedusaHC paused: %s" % exc)
+
+    def _set_tool(self, tool):
+        """Run a complete SET; let recovery callers see a failed attempt."""
         self._begin("changing", tool)
         try:
+            self._remember_print_position()
             self._set_compat("error_state", 0)
             self._set_compat("target_tool", tool)
             self._home()
             self._apply_offset(tool, move=0)
             direction = int(self._tool_cfg().get("tools_direction", 1))
-            self._run("G91\nG1 %s F14000\nG90" % (("Y%s Z3" % (-2*direction)) if self._is_printing() else "Z1"))
+            if not self._resume_preparing:
+                self._run("G91\nG1 %s F14000\nG90" % (("Y%s Z3" % (-2*direction)) if self._is_printing() else "Z1"))
             current = self._current_tool()
             if current == -2:
                 self._fail("MHC_SET: ambiguous sensor state")
             if current == tool:
+                if self._resume_preparing:
+                    v = self._motion_values(tool)
+                    old_accel = self._old_accel()
+                    self._apply_offset(0, move=0)
+                    self._run("SET_GCODE_OFFSET X=0 Y=0 MOVE=0")
+                    self._run("G90\nG1 Y%s F%s\nM106 S255" % (
+                        v["y_safe"], v["feed"]))
+                    self._after_pick(tool, v)
+                    self._run("SET_VELOCITY_LIMIT ACCEL=%s\nM106 S0" % old_accel)
+                    return
                 self._apply_offset(tool)
                 self.gcode.respond_info("MHC_SET: T%d already installed" % tool)
                 return
@@ -557,21 +600,103 @@ G1 Y{safe} F{feed}""".format(
                 self._drop_active()
             self.operation = "picking"
             self._pick(tool)
-        except _OperationPaused as exc:
-            self.gcode.respond_info("MedusaHC paused: %s" % exc)
         finally:
+            self._change_state = None
             if self.operation != "idle":
                 self._finish()
 
+    def _raise_above_layer(self, gcmd, move, layer_z):
+        """Keep the known Z position clear of the saved print layer."""
+        position = list(move.get_status(self.reactor.monotonic())["position"])
+        safe_z = max(position[2], layer_z + 5.0)
+        axis_maximum = self.printer.lookup_object("toolhead").get_status(
+            self.reactor.monotonic()).get("axis_maximum")
+        if axis_maximum is not None and safe_z > axis_maximum[2]:
+            raise gcmd.error("MHC_RESUME: cannot keep 5 mm Z clearance "
+                             "within the printer's Z limit")
+        if safe_z > position[2]:
+            self._run("G90\nG1 Z%.6f F3000" %
+                      (safe_z - move.base_position[2]))
+            position[2] = safe_z
+        return position
+
+    def cmd_MHC_RESUME(self, gcmd):
+        pause = self.printer.lookup_object("pause_resume")
+        if not pause.is_paused:
+            self.gcode.respond_info("MHC_RESUME: printer is not paused")
+            return
+        tool = gcmd.get_int("T")
+        self._validate_tool(gcmd, tool)
+        move = self.printer.lookup_object("gcode_move")
+        original = copy.deepcopy(move.saved_states.get("PAUSE_STATE"))
+        if original is None:
+            raise gcmd.error("MHC_RESUME: original print position is missing")
+        # A manual pause with the original tool still mounted needs only a
+        # safe return to the print. A failed change or a manually exchanged
+        # tool needs the full homing and preparation path.
+        error_recovery = int(self._global().get("error_state", 0)) != 0
+        prepare = error_recovery or self._current_tool() != tool
+        if prepare and self._heater_temperature(tool) <= 190.0:
+            raise gcmd.error("MHC_RESUME: heat T%d above 190C before resuming" % tool)
+        try:
+            if prepare:
+                self._resume_preparing = True
+                # A menu Z jog may have lowered the head during the pause.
+                # Restore clearance before any XY homing or dock motion.
+                self._raise_above_layer(gcmd, move,
+                                        original["last_position"][2])
+                self._run("G90\nG28 Y\nG28 X\nCLOSE")
+                self._set_tool(tool)
+                # A failed SET must never reach BASE_RESUME.
+                if self.sensor_error or self._current_tool() != tool:
+                    return
+            # Restore the G-code coordinate system using the target tool
+            # offset. A failed tool change must not return to the previous
+            # tool's last XY; the next commands in the print file travel to
+            # the new tool's destination.
+            restored = copy.deepcopy(original)
+            origin = move.get_status(self.reactor.monotonic())["homing_origin"]
+            for axis in range(3):
+                delta = origin[axis] - restored["homing_position"][axis]
+                restored["base_position"][axis] += delta
+                restored["last_position"][axis] += delta
+                restored["homing_position"][axis] = origin[axis]
+            physical_position = self._raise_above_layer(
+                gcmd, move, restored["last_position"][2])
+            if error_recovery:
+                # BASE_RESUME restores modes, offsets and E without moving
+                # XYZ. Keep the nozzle lifted for the slicer's next travel
+                # and explicit Z move at the new tool's print position.
+                restored["last_position"][:3] = physical_position[:3]
+            else:
+                # A manual pause interrupted printing at this exact point,
+                # so return above it before BASE_RESUME lowers to the layer.
+                self._run("G90\nG1 X%.6f Y%.6f F12000" % (
+                    restored["last_position"][0] - move.base_position[0],
+                    restored["last_position"][1] - move.base_position[1]))
+            move.saved_states["PAUSE_STATE"] = restored
+            self._run("BASE_RESUME VELOCITY=30")
+        except _OperationPaused as exc:
+            self.gcode.respond_info("MedusaHC still paused: %s" % exc)
+        finally:
+            self._resume_preparing = False
+            if pause.is_paused:
+                move.saved_states["PAUSE_STATE"] = original
+
     def cmd_MHC_DROP(self, gcmd):
         """Park the attached hotend, if any."""
-        self._begin("dropping")
+        tool = self._current_tool()
+        self._begin("dropping", tool)
         try:
+            if tool >= 0:
+                self._set_compat("target_tool", tool)
+            self._remember_print_position()
             self._home()
             self._drop_active()
         except _OperationPaused as exc:
             self.gcode.respond_info("MedusaHC paused: %s" % exc)
         finally:
+            self._change_state = None
             if self.operation != "idle":
                 self._finish()
 
@@ -624,14 +749,13 @@ SET_VELOCITY_LIMIT ACCEL={old}""".format(
         ))
 
     def cmd_MHC_ERROR(self, gcmd):
-        """Move away from the docks and pause only when a print is active."""
+        """Record a failed change and pause an active print once."""
         stats = self.printer.lookup_object("print_stats", None)
         state = getattr(stats, "state", "")
         if state in ("printing", "paused"):
             self._set_compat("error_state", 1)
-            cfg = self._tool_cfg()
-            safe = float(cfg["y_safe"]) + 50.0 * int(cfg.get("tools_direction", 1))
-            self._run("G90\nG1 Y%s F6000\nPAUSE" % safe)
+            if state == "printing":
+                self._run("PAUSE")
         else:
             self.gcode.respond_info("MHC_ERROR: no active print; printer was not paused")
 

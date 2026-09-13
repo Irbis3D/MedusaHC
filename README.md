@@ -582,6 +582,13 @@ If after dropping or picking up a hotend the script detects that the sensor stat
 
 After fixing the problem and resuming, the printer will pick up the planned tool and continue printing.
 
+The current Python controller distinguishes an undetermined live sensor state
+from a failed SET/DROP operation. Interfaces can use `medusahc.sensor_error`
+and `medusahc.last_error`; see the [sensor status guide](docs/sensor-status.md).
+Recovery after a failed change, and manual PAUSE/RESUME behavior, require the
+active printer macros to call `MHC_RESUME`. See the
+[PAUSE/RESUME migration guide](docs/recovery.md) before updating a printer.
+
 The frozen macro implementation and its original chained helper macros remain
 available in the `legacy-macros` branch.
 

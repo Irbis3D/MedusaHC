@@ -109,6 +109,12 @@ configuration is preserved. Current example files are written to:
 They are references for manual comparison and are not included automatically.
 Klipper is not restarted by the updater.
 
+If this update adds `MHC_RESUME`, also update your active `PAUSE` and `RESUME`
+macros before restarting Klipper. The updater preserves them, and the old
+`RESUME` macro will keep its old recovery behavior. Follow the
+[PAUSE/RESUME migration guide](docs/recovery.md); keep your printer's own
+parking coordinates and macro names.
+
 ## Uninstall
 
 First remove dependent modules such as MedusaHC-Calibrate, MedusaHC Control,

@@ -11,6 +11,8 @@ spec.loader.exec_module(module)
 class MotionTests(unittest.TestCase):
     def controller(self):
         controller = object.__new__(module.MedusaHC)
+        controller._resume_preparing = False
+        controller._change_state = None
         controller._macro = Mock(return_value={"prime_amount": 10, "prime_speed": 5,
                                               "x_clean_move": 8, "y_clean_move": 5,
                                               "clean_move_speed": 250,
