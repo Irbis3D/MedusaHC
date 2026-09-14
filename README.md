@@ -571,8 +571,8 @@ Thanks to the `pin_watch` script, the printer always knows its state, even if yo
 ### Dropping a tool and error handling
 
 Use the public `DROP_TOOL` command to park the currently installed hotend.
-`DROP` is retained only as an internal compatibility command and is not shown
-as a user macro.
+The included `_DROP` macro calls `MHC_DROP` for internal users such as
+MedusaHC-Calibrate; it does not add a Mainsail button.
 
 ---
 

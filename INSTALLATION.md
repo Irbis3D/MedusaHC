@@ -109,6 +109,15 @@ configuration is preserved. Current example files are written to:
 They are references for manual comparison and are not included automatically.
 Klipper is not restarted by the updater.
 
+The Python controller registers only `MHC_*` G-code commands. If a custom
+configuration called the removed unprefixed Python aliases, use the supplied
+macro wrappers or the controller commands instead: `DROP` → `_DROP` or
+`MHC_DROP`, `TOOL_OFFSET_T` → `_TOOL_OFFSET_T` or `MHC_TOOL_OFFSET`,
+`LAYER_SET` → `_LAYER_SET` or `MHC_LAYER_SET`, and `PRIME_FLAGS_SET` →
+`_PRIME_FLAGS_SET`. Update MedusaHC Control before Core if Control is installed;
+the matching Control release applies active-tool offsets through
+`MHC_TOOL_OFFSET`.
+
 If this update adds `MHC_RESUME`, also update your active `PAUSE` and `RESUME`
 macros before restarting Klipper. The updater preserves them, and the old
 `RESUME` macro will keep its old recovery behavior. Follow the

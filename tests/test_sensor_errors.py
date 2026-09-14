@@ -6,6 +6,22 @@ import test_motion
 
 
 class SensorErrorTests(unittest.TestCase):
+    def test_command_registration_does_not_claim_macro_names(self):
+        macro_names = {"DROP", "TOOL_OFFSET_T", "LAYER_SET", "PRIME_FLAGS_SET"}
+        registered = set(macro_names)
+
+        def register(name, handler, desc=None):
+            if name in registered:
+                raise RuntimeError("G-code command already registered: " + name)
+            registered.add(name)
+
+        controller = object.__new__(test_motion.module.MedusaHC)
+        controller.gcode = SimpleNamespace(register_command=register)
+        controller._register_commands()
+        self.assertIn("MHC_SET", registered)
+        self.assertIn("MHC_TOOL_OFFSET", registered)
+        self.assertTrue(all(name.startswith("MHC_") for name in registered - macro_names))
+
     def controller(self, tool=-2, printing=False):
         c = test_motion.MotionTests().controller()
         c.operation = "idle"

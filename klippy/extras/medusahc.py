@@ -58,7 +58,7 @@ class MedusaHC:
         self._register_commands()
 
     def _register_commands(self):
-        """Register internal MHC_* commands; legacy names live in the CFG."""
+        """Register the MHC_* commands called by the current config macros."""
         commands = {
             "MHC_SET": (self.cmd_MHC_SET, "Pick or change to a MedusaHC tool"),
             "MHC_DROP": (self.cmd_MHC_DROP, "Park the active MedusaHC tool"),
@@ -70,17 +70,6 @@ class MedusaHC:
             "MHC_TOOL_OFFSET": (self.cmd_MHC_TOOL_OFFSET, "Apply a tool offset"),
             "MHC_ASSIGN_TOOL": (self.cmd_MHC_ASSIGN_TOOL, "Sync klipper-toolchanger"),
             "MHC_LAYER_SET": (self.cmd_MHC_LAYER_SET, "Update the current layer"),
-            # Invisible compatibility commands for existing slicer and common
-            # macro files. Unlike [gcode_macro] wrappers, these do not create
-            # buttons in the Mainsail macro panel.
-            "DROP": (self.cmd_MHC_DROP, "Park the active MedusaHC tool"),
-            "TOOL_OFFSET_T": (
-                self.cmd_MHC_TOOL_OFFSET, "Apply a MedusaHC tool offset"
-            ),
-            "LAYER_SET": (self.cmd_MHC_LAYER_SET, "Update the current layer"),
-            "PRIME_FLAGS_SET": (
-                self.cmd_PRIME_FLAGS_SET, "Mark first prime complete for all tools"
-            ),
         }
         for name, (handler, description) in commands.items():
             self.gcode.register_command(name, handler, desc=description)
@@ -779,14 +768,6 @@ SET_VELOCITY_LIMIT ACCEL={old}""".format(
             return
         self.layer = layer
         self._set_compat("layer", layer)
-
-    def cmd_PRIME_FLAGS_SET(self, gcmd):
-        for tool in range(self._tool_count()):
-            state_macro = self._macro_name("TOOL_STATE_%d" % tool)
-            self._run(
-                "SET_GCODE_VARIABLE MACRO=%s VARIABLE=first_prime_flag VALUE=1"
-                % state_macro
-            )
 
 
 def load_config(config):
