@@ -371,8 +371,8 @@ class ResumeTests(unittest.TestCase):
         calls = []
         c._run = calls.append
         c.cmd_MHC_ERROR(None)
-        self.assertEqual(calls, ["PAUSE"])
+        self.assertEqual(calls, ["M106 S0", "PAUSE"])
         c._set_compat.assert_called_with("error_state", 1)
         state.state = "paused"
         c.cmd_MHC_ERROR(None)
-        self.assertEqual(calls, ["PAUSE"])
+        self.assertEqual(calls, ["M106 S0", "PAUSE", "M106 S0"])

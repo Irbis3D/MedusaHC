@@ -61,6 +61,39 @@ class SensorErrorTests(unittest.TestCase):
                 self.assertFalse(status["sensor_error"])
                 self.assertEqual(status["last_error"], "")
 
+    def test_fan_stops_after_success_or_unexpected_operation_error(self):
+        for command in ("cmd_MHC_SET", "cmd_MHC_DROP"):
+            for fails in (False, True):
+                with self.subTest(command=command, fails=fails):
+                    c = self.controller(tool=0)
+                    c._tool_cfg = lambda: {"tools_direction": 1}
+                    c._drop_active = Mock()
+                    c._pick = Mock()
+
+                    def motion(*args):
+                        c._run("M106 S255")
+                        if fails:
+                            raise RuntimeError("motion failed")
+
+                    if command == "cmd_MHC_SET":
+                        c._pick.side_effect = motion
+                    else:
+                        c._drop_active.side_effect = motion
+                    cmd = Mock()
+                    cmd.get_int.return_value = 1
+                    if fails:
+                        with self.assertRaisesRegex(RuntimeError, "motion failed"):
+                            getattr(c, command)(cmd)
+                    else:
+                        getattr(c, command)(cmd)
+                    self.assertEqual(c._run.call_args.args, ("M106 S0",))
+                    self.assertEqual(c.operation, "idle")
+
+    def test_error_stops_fan_when_no_print_is_active(self):
+        c = self.controller()
+        c.cmd_MHC_ERROR(None)
+        c._run.assert_called_once_with("M106 S0")
+
     def test_invalid_state_keeps_existing_error_recovery(self):
         for printing in (False, True):
             for name in ("cmd_MHC_SET", "cmd_MHC_DROP"):

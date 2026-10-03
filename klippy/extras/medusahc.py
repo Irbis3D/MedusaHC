@@ -591,7 +591,9 @@ G1 Y{safe} F{feed}""".format(
             self._pick(tool)
         finally:
             self._change_state = None
-            if self.operation != "idle":
+            try:
+                self._run("M106 S0")
+            finally:
                 self._finish()
 
     def _raise_above_layer(self, gcmd, move, layer_z):
@@ -686,7 +688,9 @@ G1 Y{safe} F{feed}""".format(
             self.gcode.respond_info("MedusaHC paused: %s" % exc)
         finally:
             self._change_state = None
-            if self.operation != "idle":
+            try:
+                self._run("M106 S0")
+            finally:
                 self._finish()
 
     def cmd_MHC_OPEN(self, gcmd):
@@ -739,6 +743,7 @@ SET_VELOCITY_LIMIT ACCEL={old}""".format(
 
     def cmd_MHC_ERROR(self, gcmd):
         """Record a failed change and pause an active print once."""
+        self._run("M106 S0")
         stats = self.printer.lookup_object("print_stats", None)
         state = getattr(stats, "state", "")
         if state in ("printing", "paused"):
